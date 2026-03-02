@@ -1,13 +1,14 @@
 --[[
-    KEYSER UI V6.5 - OPTIMIZED & CORRECTED by AI
+    KEYSER UI V7 - OPTIMIZED & CORRECTED by AI (FiveM / ImGui Style)
     Structure: Intro -> Sidebar (Main) -> Topbar (Sub) -> Content
     
     New Features & Updates:
-    - Added Intro/Loading Sequence (Dex Style).
-    - Added ColorPicker (Fatality Logic - HSV, Draggable).
-    - Added Option System (Fatality Style - Gear Icon for Sub-Elements).
-    - Refactored Element Builder for recursive nested elements (Options).
-    - Kept all previous memory leak fixes and list filtering.
+    - Removed unnecessary intro texts.
+    - Added Independent Section Scrolling (Pass Height in Section Config).
+    - Fixed colors and paddings to perfectly match the FiveM reference image.
+    - Added Keybind system (Standalone or embedded inside Toggles!).
+    - Upgraded Tweening (Quint Easing) for premium smooth animations.
+    - Retained Fatality ColorPicker & Nested Options.
 ]]
 
 local UserInputService = game:GetService("UserInputService")
@@ -18,22 +19,22 @@ local Players = game:GetService("Players")
 
 local Library = {}
 
--- [ THEME ]
+-- [ THEME - FIVEM / IMGUI STYLE ]
 local Keyser = {
     Colors = {
-        Main        = Color3.fromRGB(14, 14, 16),
-        Sidebar     = Color3.fromRGB(18, 18, 21),
-        Header      = Color3.fromRGB(20, 20, 23),
-        Content     = Color3.fromRGB(22, 22, 25),
+        Main        = Color3.fromRGB(18, 18, 22),     -- Fundo principal (levemente escuro azulado)
+        Sidebar     = Color3.fromRGB(15, 15, 18),     -- Fundo do menu lateral
+        Header      = Color3.fromRGB(20, 20, 24),     -- Fundo do topbar
+        SectionTop  = Color3.fromRGB(26, 26, 30),     -- Fundo do Título da Seção
+        SectionBg   = Color3.fromRGB(22, 22, 26),     -- Fundo do Conteúdo da Seção
         Divider     = Color3.fromRGB(35, 35, 40),
-        Element     = Color3.fromRGB(30, 30, 34),
-        Stroke      = Color3.fromRGB(40, 40, 45),
-        Text        = Color3.fromRGB(235, 235, 235),
-        TextDark    = Color3.fromRGB(130, 130, 140),
-        Accent      = Color3.fromRGB(61, 143, 220), -- Blue accent for loading and primary highlights
-        AccentWhite = Color3.fromRGB(255, 255, 255),
-        Hover       = Color3.fromRGB(40, 40, 45),
-        ValueBox    = Color3.fromRGB(12, 12, 14)
+        Element     = Color3.fromRGB(32, 32, 38),     -- Fundo de botões e caixas
+        Stroke      = Color3.fromRGB(42, 42, 48),     -- Bordas sutis
+        Text        = Color3.fromRGB(240, 240, 245),
+        TextDark    = Color3.fromRGB(140, 140, 150),
+        Accent      = Color3.fromRGB(255, 255, 255),  -- Destaque ativo (Branco por padrão na ref)
+        Hover       = Color3.fromRGB(45, 45, 52),
+        ValueBox    = Color3.fromRGB(14, 14, 16)
     },
     Font = Enum.Font.GothamMedium,
     FontBold = Enum.Font.GothamBold
@@ -47,7 +48,8 @@ local function Create(class, props)
 end
 
 local function Tween(obj, props, time)
-    TweenService:Create(obj, TweenInfo.new(time or 0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play()
+    -- EasingStyle Quint gives that professional, smooth deceleration
+    TweenService:Create(obj, TweenInfo.new(time or 0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), props):Play()
 end
 
 local function MakeDraggable(dragObj, moveObj)
@@ -84,38 +86,33 @@ function Library:Window(Config)
     local WindowScale = Config.Scale or UDim2.new(0, 800, 0, 550)
     local ToggleKey = Config.Keybind or Enum.KeyCode.RightControl
 
-    local Screen = Create("ScreenGui", {Name = "KeyserUI_V6", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
+    local Screen = Create("ScreenGui", {Name = "KeyserUI_V7", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
     
     -- [ INTRO SEQUENCE ]
     local IntroFrame = Create("Frame", {
-        Name = "Intro", Parent = Screen, BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        Name = "Intro", Parent = Screen, BackgroundColor3 = Color3.fromRGB(25, 25, 30),
         Position = UDim2.new(0.5, -175, 0.5, -100), Size = UDim2.new(0, 350, 0, 200),
         BorderSizePixel = 0, Active = true
     })
     Create("UICorner", {Parent = IntroFrame, CornerRadius = UDim.new(0, 6)})
     Create("UIStroke", {Parent = IntroFrame, Color = Keyser.Colors.Stroke, Thickness = 1})
     
-    local IntroHolder = Create("Frame", {Parent = IntroFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 40), Size = UDim2.new(1, 0, 1, 0), ClipsDescendants = true, BorderSizePixel = 0})
+    local IntroHolder = Create("Frame", {Parent = IntroFrame, BackgroundColor3 = Color3.fromRGB(20, 20, 24), Size = UDim2.new(1, 0, 1, 0), ClipsDescendants = true, BorderSizePixel = 0})
     Create("UICorner", {Parent = IntroHolder, CornerRadius = UDim.new(0, 6)})
     Create("UIGradient", {Parent = IntroHolder, Rotation = 30, Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.5)})})
     
-    local IntroTitle = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 20, 0, 15), Size = UDim2.new(1, -40, 0, 50), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.new(1,1,1), TextSize = 40, TextXAlignment = Enum.TextXAlignment.Left, TextTransparency = 1})
-    local IntroDesc = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 20, 0, 60), Size = UDim2.new(1, -40, 0, 25), Font = Keyser.Font, Text = "Ultimate Debugging Suite", TextColor3 = Color3.new(1,1,1), TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, TextTransparency = 1})
+    local IntroTitle = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 40), Size = UDim2.new(1, 0, 0, 50), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.new(1,1,1), TextSize = 40, TextXAlignment = Enum.TextXAlignment.Center, TextTransparency = 1})
     
     local StatusText = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 20, 0, 110), Size = UDim2.new(1, -40, 0, 25), Font = Keyser.Font, Text = "Fetching API...", TextColor3 = Color3.new(1,1,1), TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, TextTransparency = 1})
     
-    local ProgressBarBg = Create("Frame", {Parent = IntroHolder, BackgroundColor3 = Color3.fromRGB(20, 20, 20), Position = UDim2.new(0, 20, 0, 145), Size = UDim2.new(1, -40, 0, 4), BorderSizePixel = 0})
+    local ProgressBarBg = Create("Frame", {Parent = IntroHolder, BackgroundColor3 = Color3.fromRGB(15, 15, 18), Position = UDim2.new(0, 20, 0, 145), Size = UDim2.new(1, -40, 0, 4), BorderSizePixel = 0})
     Create("UICorner", {Parent = ProgressBarBg, CornerRadius = UDim.new(1, 0)})
-    local ProgressBar = Create("Frame", {Parent = ProgressBarBg, BackgroundColor3 = Keyser.Colors.Accent, Size = UDim2.new(0, 0, 1, 0), BorderSizePixel = 0})
+    local ProgressBar = Create("Frame", {Parent = ProgressBarBg, BackgroundColor3 = Keyser.Colors.Text, Size = UDim2.new(0, 0, 1, 0), BorderSizePixel = 0})
     Create("UICorner", {Parent = ProgressBar, CornerRadius = UDim.new(1, 0)})
-    
-    local IntroCreator = Create("TextLabel", {Parent = IntroFrame, BackgroundTransparency = 1, Position = UDim2.new(1, -120, 1, -25), Size = UDim2.new(0, 105, 0, 20), Font = Keyser.Font, Text = "Keyser Lib V6.5", TextColor3 = Color3.new(1,1,1), TextSize = 12, TextXAlignment = Enum.TextXAlignment.Right, TextTransparency = 1})
 
     -- Animação da Intro
     Tween(IntroTitle, {TextTransparency = 0}, 0.5)
-    Tween(IntroDesc, {TextTransparency = 0}, 0.5)
     Tween(StatusText, {TextTransparency = 0}, 0.5)
-    Tween(IntroCreator, {TextTransparency = 0}, 0.5)
     
     task.wait(0.5)
     
@@ -148,14 +145,13 @@ function Library:Window(Config)
         Position = UDim2.new(0.5, -WindowScale.X.Offset/2, 0.5, -WindowScale.Y.Offset/2), 
         Size = WindowScale,
         ClipsDescendants = true,
-        BackgroundTransparency = 1 -- Inicia invisível para fade in
+        BackgroundTransparency = 1
     })
-    Create("UICorner", {Parent = MainFrame, CornerRadius = UDim.new(0, 6)})
+    Create("UICorner", {Parent = MainFrame, CornerRadius = UDim.new(0, 8)})
     local MainStroke = Create("UIStroke", {Parent = MainFrame, Color = Keyser.Colors.Stroke, Thickness = 1, Transparency = 1})
 
     MakeDraggable(MainFrame, MainFrame)
     
-    -- Fade in Main Interface
     Tween(MainFrame, {BackgroundTransparency = 0}, 0.5)
     Tween(MainStroke, {Transparency = 0}, 0.5)
 
@@ -169,12 +165,12 @@ function Library:Window(Config)
     local Header = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 65), ZIndex = 2})
     local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Keyser.Colors.Sidebar, Position = UDim2.new(0, 0, 0, 65), Size = UDim2.new(0, 200, 1, -65), BorderSizePixel = 0})
     local LogoArea = Create("Frame", {Parent = Header, BackgroundTransparency = 1, Size = UDim2.new(0, 200, 1, 0)})
-    Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 14), Size = UDim2.new(1, 0, 0, 22), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.fromRGB(110, 110, 120), TextSize = 22})
+    Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 14), Size = UDim2.new(1, 0, 0, 22), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.fromRGB(150, 150, 160), TextSize = 22})
     Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, 14), Font = Keyser.Font, Text = "discord.gg/keyser", TextColor3 = Keyser.Colors.TextDark, TextSize = 11})
 
     local NavContainer = Create("Frame", {Parent = Header, BackgroundTransparency = 1, Position = UDim2.new(0, 200, 0, 0), Size = UDim2.new(1, -200, 1, 0)})
     local SideContainer = Create("ScrollingFrame", {Parent = Sidebar, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 0, CanvasSize = UDim2.new(0,0,0,0)})
-    Create("UIListLayout", {Parent = SideContainer, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 4)})
+    Create("UIListLayout", {Parent = SideContainer, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6)})
     Create("UIPadding", {Parent = SideContainer, PaddingTop = UDim.new(0, 15), PaddingLeft = UDim.new(0, 15), PaddingRight = UDim.new(0, 15)})
 
     local PageContainer = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 201, 0, 65), Size = UDim2.new(1, -201, 1, -65), ClipsDescendants = true})
@@ -183,7 +179,7 @@ function Library:Window(Config)
     local WinData = {ActiveSidebar = nil}
     local AllSidebarTabs = {}
     
-    -- Function to Handle the Floating "Option" Menus
+    -- Function to Handle Floating "Option" Menus
     local function CreateOptionFlyout(AnchorButton)
         local Flyout = Create("Frame", {
             Parent = Screen, BackgroundColor3 = Keyser.Colors.Sidebar,
@@ -212,7 +208,7 @@ function Library:Window(Config)
             if isOpen then
                 Flyout.Visible = true
                 local targetHeight = math.clamp(List.AbsoluteContentSize.Y + 20, 0, 250)
-                Tween(Flyout, {Size = UDim2.new(0, 180, 0, targetHeight)}, 0.2)
+                Tween(Flyout, {Size = UDim2.new(0, 180, 0, targetHeight)}, 0.25)
                 
                 updater = RunService.RenderStepped:Connect(function()
                     Flyout.Position = UDim2.new(0, AnchorButton.AbsolutePosition.X + AnchorButton.AbsoluteSize.X + 10, 0, AnchorButton.AbsolutePosition.Y - (Flyout.AbsoluteSize.Y/2) + 10)
@@ -242,28 +238,103 @@ function Library:Window(Config)
         return Scroll
     end
 
-    -- Element Builder Factory (Used for Sections and Options)
+    -- Element Builder Factory (Recursive for Sections and Options)
     local function BuildElements(TargetParent)
         local Elements = {}
         
+        function Elements:Keybind(Cfg)
+            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            
+            local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -70, 0.5, -11), Size = UDim2.new(0, 70, 0, 22), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = BindBtn, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = Cfg.Default and Cfg.Default.Name or "None", TextColor3 = Keyser.Colors.Text, TextSize = 11})
+            
+            local currentKey = Cfg.Default
+            local binding = false
+            
+            BindBtn.MouseButton1Click:Connect(function()
+                if binding then return end
+                binding = true
+                BindText.Text = "..."
+                local connection
+                connection = UserInputService.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.Keyboard then
+                        local key = input.KeyCode
+                        if key == Enum.KeyCode.Escape then
+                            currentKey = nil
+                            BindText.Text = "None"
+                        else
+                            currentKey = key
+                            BindText.Text = key.Name
+                        end
+                        binding = false
+                        if Cfg.Callback then pcall(Cfg.Callback, currentKey) end
+                        connection:Disconnect()
+                    end
+                end)
+            end)
+        end
+        
         function Elements:Toggle(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.8, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
-            local CheckBg = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -22, 0.5, -11), Size = UDim2.new(0, 22, 0, 22), Text = "", AutoButtonColor = false}); Create("UICorner", {Parent = CheckBg, CornerRadius = UDim.new(0, 4)})
-            local CheckIcon = Create("ImageLabel", {Parent = CheckBg, BackgroundTransparency = 1, Position = UDim2.new(0, 3, 0, 3), Size = UDim2.new(1, -6, 1, -6), Image = "rbxassetid://10709790644", ImageColor3 = Color3.new(0,0,0), ImageTransparency = 1})
+            local CheckBg = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -22, 0.5, -11), Size = UDim2.new(0, 22, 0, 22), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = CheckBg, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = CheckBg, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local CheckIcon = Create("ImageLabel", {Parent = CheckBg, BackgroundTransparency = 1, Position = UDim2.new(0, 4, 0, 4), Size = UDim2.new(1, -8, 1, -8), Image = "rbxassetid://10709790644", ImageColor3 = Color3.new(0,0,0), ImageTransparency = 1})
+            
+            local rightOffset = 30
             
             local OptionBtn
             if Cfg.Option then
-                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -45, 0.5, -8), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = Keyser.Colors.TextDark, ImageTransparency = 0.5})
+                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -(rightOffset + 16), 0.5, -8), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = Keyser.Colors.TextDark, ImageTransparency = 0.5})
                 OptionBtn.MouseEnter:Connect(function() Tween(OptionBtn, {ImageTransparency = 0}) end)
                 OptionBtn.MouseLeave:Connect(function() Tween(OptionBtn, {ImageTransparency = 0.5}) end)
+                rightOffset = rightOffset + 22
+            end
+
+            -- Keybind anexada ao Toggle
+            local boundKey = Cfg.Keybind
+            if boundKey ~= nil then
+                local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Main, Position = UDim2.new(1, -(rightOffset + 40), 0.5, -10), Size = UDim2.new(0, 40, 0, 20), Text = "", AutoButtonColor = false})
+                Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)})
+                Create("UIStroke", {Parent = BindBtn, Color = Keyser.Colors.Stroke, Thickness = 1})
+                local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = typeof(boundKey)=="EnumItem" and boundKey.Name or "None", TextColor3 = Keyser.Colors.TextDark, TextSize = 10})
+                
+                local binding = false
+                BindBtn.MouseButton1Click:Connect(function()
+                    if binding then return end
+                    binding = true; BindText.Text = "..."
+                    local conn
+                    conn = UserInputService.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            if input.KeyCode == Enum.KeyCode.Escape then boundKey = nil; BindText.Text = "None"
+                            else boundKey = input.KeyCode; BindText.Text = boundKey.Name end
+                            binding = false; conn:Disconnect()
+                        end
+                    end)
+                end)
+                
+                UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == boundKey and boundKey ~= nil then
+                        -- Simula o clique
+                        CheckBg.BackgroundColor3 = Keyser.Colors.Hover
+                        task.delay(0.1, function()
+                            local t = not (CheckIcon.ImageTransparency == 0)
+                            if t then Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Accent}); Tween(CheckIcon, {ImageTransparency = 0}) else Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Element}); Tween(CheckIcon, {ImageTransparency = 1}) end
+                            if Cfg.Callback then pcall(Cfg.Callback, t) end
+                        end)
+                    end
+                end)
             end
 
             local Toggled = Cfg.Default or false
             local function Update()
                 if Toggled then 
-                    Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.AccentWhite})
+                    Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Accent})
                     Tween(CheckIcon, {ImageTransparency = 0}) 
                 else 
                     Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Element})
@@ -287,7 +358,9 @@ function Library:Window(Config)
             Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.Text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
             local ValBox = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 40, 0, 20)}); Create("UICorner", {Parent = ValBox, CornerRadius = UDim.new(0, 3)})
+            Create("UIStroke", {Parent = ValBox, Color = Keyser.Colors.Stroke})
             local ValLabel = Create("TextLabel", {Parent = ValBox, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = "0.00", TextColor3 = Keyser.Colors.TextDark, TextSize = 11})
+            
             local Rail = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(0, 0, 0, 35), Size = UDim2.new(1, 0, 0, 4)}); Create("UICorner", {Parent = Rail, CornerRadius = UDim.new(1, 0)})
             local Fill = Create("Frame", {Parent = Rail, BackgroundColor3 = Keyser.Colors.TextDark, Size = UDim2.new(0, 0, 1, 0)}); Create("UICorner", {Parent = Fill, CornerRadius = UDim.new(1, 0)})
             local Trigger = Create("TextButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(0,0,0,25), Size = UDim2.new(1,0,0,25), Text = ""})
@@ -363,6 +436,7 @@ function Library:Window(Config)
             
             local HexBox = Create("TextBox", {Parent = Flyout, Position = UDim2.new(0, 10, 0, 130), Size = UDim2.new(0, 160, 0, 20), BackgroundColor3 = Keyser.Colors.ValueBox, Font = Keyser.Font, Text = "#FFFFFF", TextColor3 = Keyser.Colors.Text, TextSize = 12})
             Create("UICorner", {Parent = HexBox, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = HexBox, Color = Keyser.Colors.Stroke})
 
             local Hue, Sat, Val = ColorBtn.BackgroundColor3:ToHSV()
             local updater, isOpen = nil, false
@@ -430,7 +504,7 @@ function Library:Window(Config)
         function Elements:Input(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55)})
             Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.Text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local InputContainer = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Main, Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30)}); Create("UICorner", {Parent = InputContainer, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = InputContainer, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local InputContainer = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30)}); Create("UICorner", {Parent = InputContainer, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = InputContainer, Color = Keyser.Colors.Stroke, Thickness = 1})
             local Box = Create("TextBox", {Parent = InputContainer, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -20, 1, 0), Font = Keyser.Font, Text = "", PlaceholderText = Cfg.Placeholder or "Search...", TextColor3 = Keyser.Colors.Text, PlaceholderColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
             Box:GetPropertyChangedSignal("Text"):Connect(function() if Cfg.Callback then pcall(Cfg.Callback, Box.Text) end end)
         end
@@ -438,7 +512,7 @@ function Library:Window(Config)
         function Elements:List(Cfg)
             local ListObj = {}
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, Cfg.Height or 150)})
-            local Scroll = Create("ScrollingFrame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Main, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0)}); Create("UICorner", {Parent = Scroll, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = Scroll, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local Scroll = Create("ScrollingFrame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0)}); Create("UICorner", {Parent = Scroll, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = Scroll, Color = Keyser.Colors.Stroke, Thickness = 1})
             local ListLayout = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder}); Create("UIPadding", {Parent = Scroll, PaddingLeft = UDim.new(0, 5)})
             local Items = {}; ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0,0,0, ListLayout.AbsoluteContentSize.Y) end)
             for _, v in pairs(Cfg.Items) do
@@ -452,6 +526,7 @@ function Library:Window(Config)
 
         function Elements:Button(Cfg)
             local Btn = Create("TextButton", {Parent = TargetParent, BackgroundColor3 = Keyser.Colors.Element, Size = UDim2.new(1, 0, 0, 32), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, AutoButtonColor = false}); Create("UICorner", {Parent = Btn, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = Btn, Color = Keyser.Colors.Stroke, Thickness = 1})
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundColor3 = Keyser.Colors.Hover, TextColor3 = Keyser.Colors.Text}) end); Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundColor3 = Keyser.Colors.Element, TextColor3 = Keyser.Colors.TextDark}) end)
             Btn.MouseButton1Click:Connect(function() if Cfg.Callback then pcall(Cfg.Callback) end end)
         end
@@ -502,17 +577,13 @@ function Library:Window(Config)
             local TopBtn = Create("TextButton", {Parent = TopButtonsFrame, BackgroundColor3 = Color3.fromRGB(30, 30, 35), BackgroundTransparency = 1, Size = UDim2.new(0, 0, 0, 32), Font = Keyser.FontBold, Text = Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, AutomaticSize = Enum.AutomaticSize.X})
             Create("UICorner", {Parent = TopBtn, CornerRadius = UDim.new(0, 4)}); Create("UIPadding", {Parent = TopBtn, PaddingLeft = UDim.new(0, 16), PaddingRight = UDim.new(0, 16)})
 
-            local PageScroll = Create("ScrollingFrame", {Parent = PageContainer, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Visible = false, ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
-            Create("UIPadding", {Parent = PageScroll, PaddingTop = UDim.new(0, 20), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20), PaddingBottom = UDim.new(0, 20)})
+            local PageFrame = Create("Frame", {Parent = PageContainer, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Visible = false})
+            Create("UIPadding", {Parent = PageFrame, PaddingTop = UDim.new(0, 20), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20), PaddingBottom = UDim.new(0, 20)})
 
-            local LeftCol = Create("Frame", {Parent = PageScroll, BackgroundTransparency = 1, Size = UDim2.new(0.485, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
-            local RightCol = Create("Frame", {Parent = PageScroll, BackgroundTransparency = 1, Size = UDim2.new(0.485, 0, 0, 0), Position = UDim2.new(0.515, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
-            local LList = Create("UIListLayout", {Parent = LeftCol, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)})
-            local RList = Create("UIListLayout", {Parent = RightCol, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)})
-
-            local function UpdCanvas() PageScroll.CanvasSize = UDim2.new(0,0,0, math.max(LList.AbsoluteContentSize.Y, RList.AbsoluteContentSize.Y) + 40) end
-            LList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdCanvas)
-            RList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdCanvas)
+            local LeftCol = Create("Frame", {Parent = PageFrame, BackgroundTransparency = 1, Size = UDim2.new(0.485, 0, 1, 0)})
+            local RightCol = Create("Frame", {Parent = PageFrame, BackgroundTransparency = 1, Size = UDim2.new(0.485, 0, 1, 0), Position = UDim2.new(0.515, 0, 0, 0)})
+            Create("UIListLayout", {Parent = LeftCol, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)})
+            Create("UIListLayout", {Parent = RightCol, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)})
 
             function PageObj:Activate()
                 if TabObj.ActiveTop and TabObj.ActiveTop ~= PageObj then
@@ -521,29 +592,53 @@ function Library:Window(Config)
                 end
                 TabObj.ActiveTop = PageObj
                 Tween(TopBtn, {BackgroundTransparency = 0, TextColor3 = Keyser.Colors.Text})
-                PageScroll.Visible = true
+                PageFrame.Visible = true
             end
 
             TopBtn.MouseButton1Click:Connect(function() PageObj:Activate() end)
-            PageObj.Btn = TopBtn; PageObj.Page = PageScroll
+            PageObj.Btn = TopBtn; PageObj.Page = PageFrame
             table.insert(TabObj.TopTabs, PageObj)
 
-            --[ 3. SECTION (GROUPBOX) ]
+            --[ 3. SECTION (GROUPBOX) - NOW WITH INDEPENDENT SCROLLING ]
             local SectionLib = {}
             function SectionLib:Section(SecConfig)
                 local Col = (SecConfig.Side == "Right" and RightCol) or LeftCol
-                local Groupbox = Create("Frame", {Parent = Col, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
-                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.Header, Size = UDim2.new(1, 0, 0, 40)})
-                Create("UICorner", {Parent = HeaderFrame, CornerRadius = UDim.new(0, 5)})
-                Create("Frame", {Parent = HeaderFrame, BackgroundColor3 = Keyser.Colors.Header, Position = UDim2.new(0,0,1,-5), Size = UDim2.new(1,0,0,5), BorderSizePixel=0})
+                
+                -- Se Height for passado, a seção terá altura fixa. Senão, ajusta ao conteúdo.
+                local fixHeight = SecConfig.Height
+                
+                local Groupbox = Create("Frame", {Parent = Col, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, fixHeight or 0), AutomaticSize = fixHeight and Enum.AutomaticSize.None or Enum.AutomaticSize.Y})
+                
+                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.SectionTop, Size = UDim2.new(1, 0, 0, 40)})
+                Create("UICorner", {Parent = HeaderFrame, CornerRadius = UDim.new(0, 6)})
+                Create("Frame", {Parent = HeaderFrame, BackgroundColor3 = Keyser.Colors.SectionTop, Position = UDim2.new(0,0,1,-5), Size = UDim2.new(1,0,0,5), BorderSizePixel=0})
                 Create("TextLabel", {Parent = HeaderFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 15, 0, 0), Size = UDim2.new(1, -15, 1, 0), Font = Keyser.FontBold, Text = SecConfig.Name, TextColor3 = Keyser.Colors.Text, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left})
                 Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.Divider, BorderSizePixel = 0, Position = UDim2.new(0, 0, 0, 40), Size = UDim2.new(1, 0, 0, 1), ZIndex = 2})
 
-                local ContentFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.Content, Position = UDim2.new(0, 0, 0, 41), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
-                Create("UICorner", {Parent = ContentFrame, CornerRadius = UDim.new(0, 5)})
-                Create("Frame", {Parent = ContentFrame, BackgroundColor3 = Keyser.Colors.Content, Size = UDim2.new(1,0,0,5), BorderSizePixel=0})
-                Create("UIListLayout", {Parent = ContentFrame, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
+                local ContentFrame
+                if fixHeight then
+                    -- Scrolling Content para seção com limite
+                    ContentFrame = Create("ScrollingFrame", {
+                        Parent = Groupbox, BackgroundColor3 = Keyser.Colors.SectionBg, Position = UDim2.new(0, 0, 0, 41), Size = UDim2.new(1, 0, 1, -41),
+                        ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0
+                    })
+                else
+                    -- Content Dinâmico normal
+                    ContentFrame = Create("Frame", {
+                        Parent = Groupbox, BackgroundColor3 = Keyser.Colors.SectionBg, Position = UDim2.new(0, 0, 0, 41), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y
+                    })
+                end
+                
+                Create("UICorner", {Parent = ContentFrame, CornerRadius = UDim.new(0, 6)})
+                Create("Frame", {Parent = ContentFrame, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(1,0,0,5), BorderSizePixel=0})
+                local CList = Create("UIListLayout", {Parent = ContentFrame, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
                 Create("UIPadding", {Parent = ContentFrame, PaddingTop = UDim.new(0, 15), PaddingLeft = UDim.new(0, 15), PaddingRight = UDim.new(0, 15), PaddingBottom = UDim.new(0, 15)})
+                
+                if fixHeight then
+                    CList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                        ContentFrame.CanvasSize = UDim2.new(0, 0, 0, CList.AbsoluteContentSize.Y + 30)
+                    end)
+                end
                 
                 return BuildElements(ContentFrame)
             end
