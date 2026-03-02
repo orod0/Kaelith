@@ -1,9 +1,11 @@
 --[[
-    KEYSER UI V8 - FIVEM & IMGUI EDITION (OPTIMIZED by AI)
-    Structure: Intro -> Sidebar/Topbar (#131217) -> Content Canvas (#0e0d12) -> Section Cards (#131217)
+    KEYSER UI V8.5 - FIVEM & IMGUI EDITION (OPTIMIZED by AI)
+    Structure: Intro -> Sidebar/Topbar (#131217) -> Content Canvas (#0e0d12) -> Section Cards (#131217 / Header #1c1b22)
     
     Features:
     - FiveM Style Layout (Floating sections over dark canvas).
+    - Reduced padding for tighter, professional spacing.
+    - Two-tone Section Cards (Header differs from body).
     - Independent Section Scrolling (Pass Height in Section Config).
     - Keybind System (Standalone & Embedded in Toggles).
     - Nested Options (Gear Icon / Flyout Menus).
@@ -21,17 +23,18 @@ local Library = {}
 --[ THEME - FIVEM / IMGUI STYLE ]
 local Keyser = {
     Colors = {
-        Main        = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo da Sidebar e Topbar)
-        Canvas      = Color3.fromRGB(14, 13, 18),     -- #0e0d12 (Fundo do Quadro/Canvas)
-        SectionBg   = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo dos Cards das Seções)
-        Divider     = Color3.fromRGB(35, 34, 40),     -- Linhas sutis
-        Element     = Color3.fromRGB(28, 27, 33),     -- Fundo das caixas de input e binds
-        Stroke      = Color3.fromRGB(40, 38, 45),     -- Bordas 
-        Text        = Color3.fromRGB(240, 240, 245),  -- Texto claro
-        TextDark    = Color3.fromRGB(120, 120, 130),  -- Texto apagado (inativo)
-        Accent      = Color3.fromRGB(255, 255, 255),  -- Cor principal ativa
-        Hover       = Color3.fromRGB(45, 43, 50),     -- Efeito Hover
-        ValueBox    = Color3.fromRGB(16, 15, 20)      -- Fundo de valores de slider
+        Main          = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo da Sidebar e Topbar)
+        Canvas        = Color3.fromRGB(14, 13, 18),     -- #0e0d12 (Fundo do Quadro/Canvas)
+        SectionHeader = Color3.fromRGB(28, 27, 34),     -- #1c1b22 (Fundo do Título da Seção)
+        SectionBg     = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo dos Cards das Seções)
+        Divider       = Color3.fromRGB(35, 34, 40),     -- Linhas sutis
+        Element       = Color3.fromRGB(28, 27, 33),     -- Fundo das caixas de input e binds
+        Stroke        = Color3.fromRGB(40, 38, 45),     -- Bordas 
+        Text          = Color3.fromRGB(240, 240, 245),  -- Texto claro
+        TextDark      = Color3.fromRGB(120, 120, 130),  -- Texto apagado (inativo)
+        Accent        = Color3.fromRGB(255, 255, 255),  -- Cor principal ativa
+        Hover         = Color3.fromRGB(45, 43, 50),     -- Efeito Hover
+        ValueBox      = Color3.fromRGB(16, 15, 20)      -- Fundo de valores de slider
     },
     Font = Enum.Font.GothamMedium,
     FontBold = Enum.Font.GothamBold
@@ -82,7 +85,7 @@ function Library:Window(Config)
     local WindowScale = Config.Scale or UDim2.new(0, 800, 0, 550)
     local ToggleKey = Config.Keybind or Enum.KeyCode.RightControl
 
-    local Screen = Create("ScreenGui", {Name = "KeyserUI_V8", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
+    local Screen = Create("ScreenGui", {Name = "Keyser", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
     
     -- [ INTRO SEQUENCE ]
     local IntroFrame = Create("Frame", {
@@ -217,9 +220,11 @@ function Library:Window(Config)
                 local mx, my = input.Position.X, input.Position.Y
                 local fx, fy = Flyout.AbsolutePosition.X, Flyout.AbsolutePosition.Y
                 local bx, by = AnchorButton.AbsolutePosition.X, AnchorButton.AbsolutePosition.Y
-                if isOpen and not (mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y) and not (mx >= bx and mx <= bx + AnchorButton.AbsoluteSize.X and my >= by and my <= by + AnchorButton.AbsoluteSize.Y) then
-                    ToggleFlyout(false)
-                end
+                
+                local inFlyout = mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y
+                local inButton = mx >= bx and mx <= bx + AnchorButton.AbsoluteSize.X and my >= by and my <= by + AnchorButton.AbsoluteSize.Y
+                
+                if isOpen and not inFlyout and not inButton then ToggleFlyout(false) end
             end
         end)
         return Scroll
@@ -260,7 +265,7 @@ function Library:Window(Config)
         end
         
         function Elements:Toggle(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
+            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 26)})
             Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
             local CheckBg = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -22, 0.5, -11), Size = UDim2.new(0, 22, 0, 22), Text = "", AutoButtonColor = false})
@@ -330,17 +335,17 @@ function Library:Window(Config)
         end
 
         function Elements:Slider(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.Text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 45)})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
             local ValBox = Create("Frame", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 40, 0, 20)})
             local ValLabel = Create("TextLabel", {Parent = ValBox, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = "0.00", TextColor3 = Keyser.Colors.TextDark, TextSize = 11})
             
-            local Rail = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(0, 0, 0, 35), Size = UDim2.new(1, 0, 0, 4)}); Create("UICorner", {Parent = Rail, CornerRadius = UDim.new(1, 0)})
+            local Rail = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(0, 0, 0, 30), Size = UDim2.new(1, 0, 0, 4)}); Create("UICorner", {Parent = Rail, CornerRadius = UDim.new(1, 0)})
             local Fill = Create("Frame", {Parent = Rail, BackgroundColor3 = Keyser.Colors.TextDark, Size = UDim2.new(0, 0, 1, 0)}); Create("UICorner", {Parent = Fill, CornerRadius = UDim.new(1, 0)})
             local Knob = Create("Frame", {Parent = Fill, BackgroundColor3 = Keyser.Colors.TextDark, Size = UDim2.new(0, 10, 0, 10), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0)}); Create("UICorner", {Parent = Knob, CornerRadius = UDim.new(1, 0)})
             
-            local Trigger = Create("TextButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(0,0,0,25), Size = UDim2.new(1,0,0,25), Text = ""})
+            local Trigger = Create("TextButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(0,0,0,20), Size = UDim2.new(1,0,0,25), Text = ""})
             
             local OptionBtn
             if Cfg.Option then
@@ -442,6 +447,21 @@ function Library:Window(Config)
             Box:GetPropertyChangedSignal("Text"):Connect(function() if Cfg.Callback then pcall(Cfg.Callback, Box.Text) end end)
         end
 
+        function Elements:List(Cfg)
+            local ListObj = {}
+            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, Cfg.Height or 150)})
+            local Scroll = Create("ScrollingFrame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0)}); Create("UICorner", {Parent = Scroll, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = Scroll, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local ListLayout = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder}); Create("UIPadding", {Parent = Scroll, PaddingLeft = UDim.new(0, 5)})
+            local Items = {}; ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0,0,0, ListLayout.AbsoluteContentSize.Y) end)
+            for _, v in pairs(Cfg.Items) do
+                local Btn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), Font = Keyser.Font, Text = "  "..v, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
+                Btn.MouseButton1Click:Connect(function() for _, b in pairs(Items) do b.Obj.TextColor3 = Keyser.Colors.TextDark end; Btn.TextColor3 = Keyser.Colors.Text; if Cfg.Callback then pcall(Cfg.Callback, v) end end)
+                table.insert(Items, {Obj = Btn, Val = v})
+            end
+            function ListObj:Filter(txt) for _, item in pairs(Items) do item.Obj.Visible = string.find(string.lower(item.Val), string.lower(txt or "")) ~= nil end end
+            return ListObj
+        end
+
         function Elements:Button(Cfg)
             local Btn = Create("TextButton", {Parent = TargetParent, BackgroundColor3 = Keyser.Colors.Element, Size = UDim2.new(1, 0, 0, 32), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, AutoButtonColor = false}); Create("UICorner", {Parent = Btn, CornerRadius = UDim.new(0, 4)})
             Create("UIStroke", {Parent = Btn, Color = Keyser.Colors.Stroke, Thickness = 1})
@@ -476,7 +496,7 @@ function Library:Window(Config)
                 if WinData.ActiveSidebar.ActiveTop then WinData.ActiveSidebar.ActiveTop.Page.Visible = false end
             end
             WinData.ActiveSidebar = TabObj
-            Tween(SideBtn, {BackgroundTransparency = 0}) -- Element bg like #1c1b21
+            Tween(SideBtn, {BackgroundTransparency = 0}) 
             Tween(Label, {TextColor3 = Keyser.Colors.Text})
             Tween(Icon, {ImageColor3 = Keyser.Colors.Text})
             TopButtonsFrame.Visible = true
@@ -514,36 +534,38 @@ function Library:Window(Config)
             PageObj.Btn = TopBtn; PageObj.Page = PageFrame
             table.insert(TabObj.TopTabs, PageObj)
 
-            --[ 3. SECTION (GROUPBOX) - FIVEM STYLE (Floating Card over Canvas) ]
+            --[ 3. SECTION (GROUPBOX) - FIVEM STYLE (Header differs from body) ]
             local SectionLib = {}
             function SectionLib:Section(SecConfig)
                 local Col = (SecConfig.Side == "Right" and RightCol) or LeftCol
                 local fixHeight = SecConfig.Height
                 
-                -- The Card (Floating inside Canvas)
+                -- The Card Base (Floating inside Canvas)
                 local Groupbox = Create("Frame", {Parent = Col, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(1, 0, 0, fixHeight or 0), AutomaticSize = fixHeight and Enum.AutomaticSize.None or Enum.AutomaticSize.Y})
                 Create("UICorner", {Parent = Groupbox, CornerRadius = UDim.new(0, 6)})
                 Create("UIStroke", {Parent = Groupbox, Color = Keyser.Colors.Stroke, Thickness = 1})
 
-                -- Header Text (Transparent background)
-                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40)})
-                Create("TextLabel", {Parent = HeaderFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 15, 0, 0), Size = UDim2.new(1, -15, 1, 0), Font = Keyser.FontBold, Text = SecConfig.Name, TextColor3 = Keyser.Colors.Text, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left})
-                
-                -- Subtle Divider Line
-                Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.Divider, BorderSizePixel = 0, Position = UDim2.new(0, 10, 0, 40), Size = UDim2.new(1, -20, 0, 1), ZIndex = 2})
+                -- Header Frame (#1c1b22)
+                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.SectionHeader, Size = UDim2.new(1, 0, 0, 38), BorderSizePixel = 0})
+                Create("UICorner", {Parent = HeaderFrame, CornerRadius = UDim.new(0, 6)})
+                -- Fill bottom corners to merge with body
+                Create("Frame", {Parent = HeaderFrame, BackgroundColor3 = Keyser.Colors.SectionHeader, Position = UDim2.new(0,0,1,-6), Size = UDim2.new(1,0,0,6), BorderSizePixel = 0}) 
 
-                -- Content Container
+                Create("TextLabel", {Parent = HeaderFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(1, -15, 1, 0), Font = Keyser.FontBold, Text = SecConfig.Name, TextColor3 = Keyser.Colors.Text, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left})
+                
+                -- Content Container (Starts exactly after the 38px header)
                 local ContentFrame
                 if fixHeight then
-                    ContentFrame = Create("ScrollingFrame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 41), Size = UDim2.new(1, 0, 1, -41), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
+                    ContentFrame = Create("ScrollingFrame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 1, -38), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
                 else
-                    ContentFrame = Create("Frame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 41), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
+                    ContentFrame = Create("Frame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
                 end
                 
-                local CList = Create("UIListLayout", {Parent = ContentFrame, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
-                Create("UIPadding", {Parent = ContentFrame, PaddingTop = UDim.new(0, 15), PaddingLeft = UDim.new(0, 15), PaddingRight = UDim.new(0, 15), PaddingBottom = UDim.new(0, 15)})
+                -- Tighter Paddings inside the Section
+                local CList = Create("UIListLayout", {Parent = ContentFrame, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5)})
+                Create("UIPadding", {Parent = ContentFrame, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), PaddingBottom = UDim.new(0, 10)})
                 
-                if fixHeight then CList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() ContentFrame.CanvasSize = UDim2.new(0, 0, 0, CList.AbsoluteContentSize.Y + 30) end) end
+                if fixHeight then CList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() ContentFrame.CanvasSize = UDim2.new(0, 0, 0, CList.AbsoluteContentSize.Y + 20) end) end
                 
                 return BuildElements(ContentFrame)
             end
