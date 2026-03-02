@@ -1,15 +1,15 @@
 --[[
-    KEYSER UI V9.0 - FIVEM & IMGUI EDITION (PRO EVOLUTION)
-    Structure: Intro -> Sidebar/Topbar/Search -> Content Canvas -> Section Cards
+    KEYSER UI V8.5 - FIVEM & IMGUI EDITION (OPTIMIZED by AI)
+    Structure: Intro -> Sidebar/Topbar (#131217) -> Content Canvas (#0e0d12) -> Section Cards (#131217 / Header #1c1b22)
     
-    New Features (V9.0):
-    - Dynamic Theme Manager ($ColorKey string injection).
-    - Global Toast Notification System.
-    - Global Search Bar (Filters UI dynamically).
-    - Dynamic Tooltips on hover (Pass 'Description' in Cfg).
-    - Modern Dropdown & PlayerList (with Avatars).
-    - Line Plots / Performance Graphs (FPS & Ping).
-    - Complex Keybinds (Ctrl/Shift/Alt + Key).
+    Features:
+    - FiveM Style Layout (Floating sections over dark canvas).
+    - Reduced padding for tighter, professional spacing.
+    - Two-tone Section Cards (Header differs from body).
+    - Independent Section Scrolling (Pass Height in Section Config).
+    - Keybind System (Standalone & Embedded in Toggles).
+    - Nested Options (Gear Icon / Flyout Menus).
+    - Premium Animations (Quint Easing).
 ]]
 
 local UserInputService = game:GetService("UserInputService")
@@ -18,56 +18,33 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
-local Library = { ThemeObjects = {} }
+local Library = {}
 
 --[ THEME - FIVEM / IMGUI STYLE ]
 local Keyser = {
     Colors = {
-        Main          = Color3.fromRGB(19, 18, 23),
-        Canvas        = Color3.fromRGB(14, 13, 18),
-        SectionHeader = Color3.fromRGB(28, 27, 34),
-        SectionBg     = Color3.fromRGB(19, 18, 23),
-        Divider       = Color3.fromRGB(35, 34, 40),
-        Element       = Color3.fromRGB(28, 27, 33),
-        Stroke        = Color3.fromRGB(40, 38, 45),
-        Text          = Color3.fromRGB(240, 240, 245),
-        TextDark      = Color3.fromRGB(120, 120, 130),
-        Accent        = Color3.fromRGB(255, 255, 255),
-        Hover         = Color3.fromRGB(45, 43, 50),
-        ValueBox      = Color3.fromRGB(16, 15, 20)
+        Main          = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo da Sidebar e Topbar)
+        Canvas        = Color3.fromRGB(14, 13, 18),     -- #0e0d12 (Fundo do Quadro/Canvas)
+        SectionHeader = Color3.fromRGB(28, 27, 34),     -- #1c1b22 (Fundo do Título da Seção)
+        SectionBg     = Color3.fromRGB(19, 18, 23),     -- #131217 (Fundo dos Cards das Seções)
+        Divider       = Color3.fromRGB(35, 34, 40),     -- Linhas sutis
+        Element       = Color3.fromRGB(28, 27, 33),     -- Fundo das caixas de input e binds
+        Stroke        = Color3.fromRGB(40, 38, 45),     -- Bordas 
+        Text          = Color3.fromRGB(240, 240, 245),  -- Texto claro
+        TextDark      = Color3.fromRGB(120, 120, 130),  -- Texto apagado (inativo)
+        Accent        = Color3.fromRGB(255, 255, 255),  -- Cor principal ativa
+        Hover         = Color3.fromRGB(45, 43, 50),     -- Efeito Hover
+        ValueBox      = Color3.fromRGB(16, 15, 20)      -- Fundo de valores de slider
     },
     Font = Enum.Font.GothamMedium,
     FontBold = Enum.Font.GothamBold
 }
 
---[ THEME MANAGER & UTILS ]
+--[ UTILS ]
 local function Create(class, props)
     local obj = Instance.new(class)
-    for k, v in pairs(props) do
-        if type(v) == "string" and v:sub(1,1) == "$" then
-            local colorKey = v:sub(2)
-            if Keyser.Colors[colorKey] then
-                table.insert(Library.ThemeObjects, {Obj = obj, Prop = k, Color = colorKey})
-                obj[k] = Keyser.Colors[colorKey]
-            else
-                obj[k] = v
-            end
-        else
-            obj[k] = v
-        end
-    end
+    for k, v in pairs(props) do obj[k] = v end
     return obj
-end
-
-function Library:UpdateTheme(NewColors)
-    for k, v in pairs(NewColors) do
-        if Keyser.Colors[k] then Keyser.Colors[k] = v end
-    end
-    for _, entry in ipairs(Library.ThemeObjects) do
-        if entry.Obj and entry.Obj.Parent then
-            pcall(function() entry.Obj[entry.Prop] = Keyser.Colors[entry.Color] end)
-        end
-    end
 end
 
 local function Tween(obj, props, time)
@@ -81,44 +58,25 @@ local function MakeDraggable(dragObj, moveObj)
 
     dragObj.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; dragStart = input.Position; startPos = moveObj.Position
-            inputChanged = UserInputService.InputChanged:Connect(function(inp)
-                if inp.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-                    local delta = inp.Position - dragStart
+            dragging = true
+            dragStart = input.Position
+            startPos = moveObj.Position
+
+            inputChanged = UserInputService.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+                    local delta = input.Position - dragStart
                     moveObj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
                 end
             end)
-            inputEnded = UserInputService.InputEnded:Connect(function(inp)
-                if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false; inputChanged:Disconnect(); inputEnded:Disconnect()
+
+            inputEnded = UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false
+                    inputChanged:Disconnect()
+                    inputEnded:Disconnect()
                 end
             end)
         end
-    end)
-end
-
---[ NOTIFICATION SYSTEM (TOASTS) ]
-local ToastScreen = Create("ScreenGui", {Name = "KeyserToasts", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
-local ToastContainer = Create("Frame", {Parent = ToastScreen, BackgroundTransparency = 1, Size = UDim2.new(0, 250, 1, -20), Position = UDim2.new(1, -270, 0, 10)})
-Create("UIListLayout", {Parent = ToastContainer, SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Bottom, Padding = UDim.new(0, 10)})
-
-function Library:Notify(Cfg)
-    local duration = Cfg.Duration or 3
-    local Toast = Create("Frame", {Parent = ToastContainer, BackgroundColor3 = "$SectionBg", Size = UDim2.new(1, 0, 0, 60), Position = UDim2.new(1, 300, 0, 0), ClipsDescendants = true})
-    Create("UICorner", {Parent = Toast, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Toast, Color = "$Stroke", Thickness = 1})
-    
-    Create("TextLabel", {Parent = Toast, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 5), Size = UDim2.new(1, -24, 0, 20), Font = Keyser.FontBold, Text = Cfg.Title or "Notification", TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-    Create("TextLabel", {Parent = Toast, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 25), Size = UDim2.new(1, -24, 0, 30), Font = Keyser.Font, Text = Cfg.Content or "", TextColor3 = "$TextDark", TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true})
-
-    local ProgBg = Create("Frame", {Parent = Toast, BackgroundColor3 = "$Element", Position = UDim2.new(0, 0, 1, -3), Size = UDim2.new(1, 0, 0, 3), BorderSizePixel = 0})
-    local ProgBar = Create("Frame", {Parent = ProgBg, BackgroundColor3 = "$Accent", Size = UDim2.new(1, 0, 1, 0), BorderSizePixel = 0})
-
-    TweenService:Create(Toast, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
-    local pTween = TweenService:Create(ProgBar, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(0, 0, 1, 0)}); pTween:Play()
-
-    task.delay(duration, function()
-        local out = TweenService:Create(Toast, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(1, 300, 0, 0)})
-        out:Play(); out.Completed:Connect(function() Toast:Destroy() end)
     end)
 end
 
@@ -129,154 +87,178 @@ function Library:Window(Config)
 
     local Screen = Create("ScreenGui", {Name = "Keyser", Parent = CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
     
-    -- [ TOOLTIP SYSTEM ]
-    local TooltipUI = Create("Frame", {Parent = Screen, BackgroundColor3 = "$SectionBg", Size = UDim2.new(0,0,0,0), AutomaticSize = Enum.AutomaticSize.XY, ZIndex = 1000, Visible = false})
-    Create("UICorner", {Parent = TooltipUI, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = TooltipUI, Color = "$Stroke", Thickness = 1})
-    local TooltipText = Create("TextLabel", {Parent = TooltipUI, BackgroundTransparency = 1, Size = UDim2.new(0,0,0,0), AutomaticSize = Enum.AutomaticSize.XY, Font = Keyser.Font, Text = "", TextColor3 = "$Text", TextSize = 11})
-    Create("UIPadding", {Parent = TooltipUI, PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+    -- [ INTRO SEQUENCE ]
+    local IntroFrame = Create("Frame", {
+        Name = "Intro", Parent = Screen, BackgroundColor3 = Color3.fromRGB(25, 25, 30),
+        Position = UDim2.new(0.5, -175, 0.5, -100), Size = UDim2.new(0, 350, 0, 200),
+        BorderSizePixel = 0, Active = true
+    })
+    Create("UICorner", {Parent = IntroFrame, CornerRadius = UDim.new(0, 6)})
+    Create("UIStroke", {Parent = IntroFrame, Color = Keyser.Colors.Stroke, Thickness = 1})
     
-    local TooltipHovered = false
-    local function AttachTooltip(obj, text)
-        if not text then return end
-        obj.MouseEnter:Connect(function()
-            TooltipHovered = true
-            task.delay(0.5, function()
-                if TooltipHovered then
-                    TooltipText.Text = text; TooltipUI.Visible = true
-                    local rsConn; rsConn = RunService.RenderStepped:Connect(function()
-                        if not TooltipHovered then rsConn:Disconnect() return end
-                        local mPos = UserInputService:GetMouseLocation()
-                        TooltipUI.Position = UDim2.new(0, mPos.X + 15, 0, mPos.Y - 15)
-                    end)
-                end
-            end)
-        end)
-        obj.MouseLeave:Connect(function() TooltipHovered = false; TooltipUI.Visible = false end)
+    local IntroHolder = Create("Frame", {Parent = IntroFrame, BackgroundColor3 = Keyser.Colors.Main, Size = UDim2.new(1, 0, 1, 0), ClipsDescendants = true, BorderSizePixel = 0})
+    Create("UICorner", {Parent = IntroHolder, CornerRadius = UDim.new(0, 6)})
+    Create("UIGradient", {Parent = IntroHolder, Rotation = 30, Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.5)})})
+    
+    local IntroTitle = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 40), Size = UDim2.new(1, 0, 0, 50), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.new(1,1,1), TextSize = 40, TextXAlignment = Enum.TextXAlignment.Center, TextTransparency = 1})
+    local StatusText = Create("TextLabel", {Parent = IntroHolder, BackgroundTransparency = 1, Position = UDim2.new(0, 20, 0, 110), Size = UDim2.new(1, -40, 0, 25), Font = Keyser.Font, Text = "Fetching API...", TextColor3 = Color3.new(1,1,1), TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, TextTransparency = 1})
+    
+    local ProgressBarBg = Create("Frame", {Parent = IntroHolder, BackgroundColor3 = Keyser.Colors.Canvas, Position = UDim2.new(0, 20, 0, 145), Size = UDim2.new(1, -40, 0, 4), BorderSizePixel = 0})
+    Create("UICorner", {Parent = ProgressBarBg, CornerRadius = UDim.new(1, 0)})
+    local ProgressBar = Create("Frame", {Parent = ProgressBarBg, BackgroundColor3 = Keyser.Colors.Accent, Size = UDim2.new(0, 0, 1, 0), BorderSizePixel = 0})
+    Create("UICorner", {Parent = ProgressBar, CornerRadius = UDim.new(1, 0)})
+
+    Tween(IntroTitle, {TextTransparency = 0}, 0.5)
+    Tween(StatusText, {TextTransparency = 0}, 0.5)
+    task.wait(0.5)
+    
+    local loadingSteps = {{0.2, "Bypassing Anticheat..."}, {0.5, "Loading Assets..."}, {0.8, "Building User Interface..."}, {1.0, "Ready!"}}
+    for _, step in ipairs(loadingSteps) do
+        StatusText.Text = step[2]
+        Tween(ProgressBar, {Size = UDim2.new(step[1], 0, 1, 0)}, 0.4)
+        task.wait(math.random(4, 8) / 10)
     end
+    
+    task.wait(0.3)
+    Tween(IntroFrame, {BackgroundTransparency = 1}, 0.5)
+    Tween(IntroHolder, {BackgroundTransparency = 1}, 0.5)
+    for _, v in pairs(IntroFrame:GetDescendants()) do
+        if v:IsA("TextLabel") then Tween(v, {TextTransparency = 1}, 0.5) end
+        if v:IsA("Frame") then Tween(v, {BackgroundTransparency = 1}, 0.5) end
+    end
+    task.wait(0.5)
+    IntroFrame:Destroy()
 
     -- [ MAIN WINDOW ]
-    local MainFrame = Create("Frame", {Parent = Screen, BackgroundColor3 = "$Main", Position = UDim2.new(0.5, -WindowScale.X.Offset/2, 0.5, -WindowScale.Y.Offset/2), Size = WindowScale, ClipsDescendants = true})
-    Create("UICorner", {Parent = MainFrame, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = MainFrame, Color = "$Stroke", Thickness = 1})
+    local MainFrame = Create("Frame", {
+        Name = "Main", Parent = Screen, BackgroundColor3 = Keyser.Colors.Main,
+        Position = UDim2.new(0.5, -WindowScale.X.Offset/2, 0.5, -WindowScale.Y.Offset/2), 
+        Size = WindowScale, ClipsDescendants = true, BackgroundTransparency = 1
+    })
+    Create("UICorner", {Parent = MainFrame, CornerRadius = UDim.new(0, 6)})
+    local MainStroke = Create("UIStroke", {Parent = MainFrame, Color = Keyser.Colors.Stroke, Thickness = 1, Transparency = 1})
+
     MakeDraggable(MainFrame, MainFrame)
+    Tween(MainFrame, {BackgroundTransparency = 0}, 0.5)
+    Tween(MainStroke, {Transparency = 0}, 0.5)
 
     UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == ToggleKey then Screen.Enabled = not Screen.Enabled end
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == ToggleKey then
+            Screen.Enabled = not Screen.Enabled
+        end
     end)
 
+    --[ LAYOUT STRUCTURE - FIVEM STYLE ]
     local Header = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 65), ZIndex = 2})
-    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 65), Size = UDim2.new(0, 200, 1, -65)})
+    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 65), Size = UDim2.new(0, 200, 1, -65), BorderSizePixel = 0})
     
     local LogoArea = Create("Frame", {Parent = Header, BackgroundTransparency = 1, Size = UDim2.new(0, 200, 1, 0)})
     Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 14), Size = UDim2.new(1, 0, 0, 22), Font = Enum.Font.GothamBlack, Text = WindowName, TextColor3 = Color3.fromRGB(150, 150, 160), TextSize = 22})
-    Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, 14), Font = Keyser.Font, Text = "V9.0 PRO", TextColor3 = "$TextDark", TextSize = 11})
+    Create("TextLabel", {Parent = LogoArea, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 36), Size = UDim2.new(1, 0, 0, 14), Font = Keyser.Font, Text = "discord.gg/keyser", TextColor3 = Keyser.Colors.TextDark, TextSize = 11})
 
     local NavContainer = Create("Frame", {Parent = Header, BackgroundTransparency = 1, Position = UDim2.new(0, 200, 0, 0), Size = UDim2.new(1, -200, 1, 0)})
     
-    -- Global Search Container
-    local SearchContainer = Create("Frame", {Parent = Sidebar, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 45)})
-    local SearchBox = Create("TextBox", {Parent = SearchContainer, BackgroundColor3 = "$Element", Position = UDim2.new(0, 15, 0, 5), Size = UDim2.new(1, -30, 0, 30), Font = Keyser.Font, PlaceholderText = "Search Elements...", Text = "", TextColor3 = "$Text", PlaceholderColor3 = "$TextDark", TextSize = 11})
-    Create("UICorner", {Parent = SearchBox, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = SearchBox, Color = "$Stroke", Thickness = 1})
-
-    local SideContainer = Create("ScrollingFrame", {Parent = Sidebar, BackgroundTransparency = 1, Position = UDim2.new(0,0,0,45), Size = UDim2.new(1, 0, 1, -45), ScrollBarThickness = 0, CanvasSize = UDim2.new(0,0,0,0)})
+    local SideContainer = Create("ScrollingFrame", {Parent = Sidebar, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 0, CanvasSize = UDim2.new(0,0,0,0)})
     Create("UIListLayout", {Parent = SideContainer, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6)})
-    Create("UIPadding", {Parent = SideContainer, PaddingTop = UDim.new(0, 5), PaddingLeft = UDim.new(0, 15), PaddingRight = UDim.new(0, 15)})
+    Create("UIPadding", {Parent = SideContainer, PaddingTop = UDim.new(0, 15), PaddingLeft = UDim.new(0, 15), PaddingRight = UDim.new(0, 15)})
 
-    local PageContainer = Create("Frame", {Parent = MainFrame, BackgroundColor3 = "$Canvas", Position = UDim2.new(0, 200, 0, 65), Size = UDim2.new(1, -200, 1, -65), ClipsDescendants = true})
-    Create("Frame", {Parent = PageContainer, BackgroundColor3 = "$Stroke", Size = UDim2.new(1,0,0,1), BorderSizePixel = 0}) 
-    Create("Frame", {Parent = PageContainer, BackgroundColor3 = "$Stroke", Size = UDim2.new(0,1,1,0), BorderSizePixel = 0})
+    -- THE CANVAS (Quadro no meio)
+    local PageContainer = Create("Frame", {
+        Parent = MainFrame, BackgroundColor3 = Keyser.Colors.Canvas,
+        Position = UDim2.new(0, 200, 0, 65), Size = UDim2.new(1, -200, 1, -65), ClipsDescendants = true
+    })
+    
+    -- Subtis linhas divisórias entre Canvas e as Barras
+    Create("Frame", {Parent = PageContainer, BackgroundColor3 = Keyser.Colors.Stroke, Size = UDim2.new(1,0,0,1), BorderSizePixel = 0}) -- Top divider
+    Create("Frame", {Parent = PageContainer, BackgroundColor3 = Keyser.Colors.Stroke, Size = UDim2.new(0,1,1,0), BorderSizePixel = 0}) -- Left divider
 
-    local SearchableElements = {}
-    SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
-        local term = string.lower(SearchBox.Text)
-        for _, item in ipairs(SearchableElements) do
-            if term == "" then item.Obj.Visible = true
-            else item.Obj.Visible = (item.Name and string.find(string.lower(item.Name), term) ~= nil) end
-        end
-    end)
-
-    local WinData = {ActiveSidebar = nil}; local AllSidebarTabs = {}
-
+    local WinData = {ActiveSidebar = nil}
+    local AllSidebarTabs = {}
+    
+    -- Function to Handle Floating "Option" Menus
     local function CreateOptionFlyout(AnchorButton)
-        local Flyout = Create("Frame", {Parent = Screen, BackgroundColor3 = "$SectionBg", Size = UDim2.new(0, 180, 0, 0), Position = UDim2.new(0,0,0,0), ClipsDescendants = true, ZIndex = 100, Visible = false})
-        Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = "$Stroke", Thickness = 1})
-        local Scroll = Create("ScrollingFrame", {Parent = Flyout, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, -10), Position = UDim2.new(0,0,0,5), ScrollBarThickness = 0, CanvasSize = UDim2.new(0,0,0,0)})
+        local Flyout = Create("Frame", {
+            Parent = Screen, BackgroundColor3 = Keyser.Colors.SectionBg,
+            Size = UDim2.new(0, 180, 0, 0), Position = UDim2.new(0,0,0,0),
+            ClipsDescendants = true, ZIndex = 100, Visible = false
+        })
+        Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)})
+        Create("UIStroke", {Parent = Flyout, Color = Keyser.Colors.Stroke, Thickness = 1})
+        
+        local Scroll = Create("ScrollingFrame", {
+            Parent = Flyout, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, -10), Position = UDim2.new(0,0,0,5),
+            ScrollBarThickness = 0, CanvasSize = UDim2.new(0,0,0,0)
+        })
         local List = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5)})
         Create("UIPadding", {Parent = Scroll, PaddingTop = UDim.new(0, 5), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10), PaddingBottom = UDim.new(0, 5)})
+        
         List:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0, 0, 0, List.AbsoluteContentSize.Y + 10) end)
         
         local updater; local isOpen = false
+        
         local function ToggleFlyout(state)
             isOpen = state
             if isOpen then
-                Flyout.Visible = true; Tween(Flyout, {Size = UDim2.new(0, 180, 0, math.clamp(List.AbsoluteContentSize.Y + 20, 0, 250))})
-                updater = RunService.RenderStepped:Connect(function() Flyout.Position = UDim2.new(0, AnchorButton.AbsolutePosition.X + AnchorButton.AbsoluteSize.X + 10, 0, AnchorButton.AbsolutePosition.Y - (Flyout.AbsoluteSize.Y/2) + 10) end)
-            else Tween(Flyout, {Size = UDim2.new(0, 180, 0, 0)}); task.delay(0.25, function() if not isOpen then Flyout.Visible = false end end); if updater then updater:Disconnect(); updater = nil end end
+                Flyout.Visible = true
+                local targetHeight = math.clamp(List.AbsoluteContentSize.Y + 20, 0, 250)
+                Tween(Flyout, {Size = UDim2.new(0, 180, 0, targetHeight)})
+                
+                updater = RunService.RenderStepped:Connect(function()
+                    Flyout.Position = UDim2.new(0, AnchorButton.AbsolutePosition.X + AnchorButton.AbsoluteSize.X + 10, 0, AnchorButton.AbsolutePosition.Y - (Flyout.AbsoluteSize.Y/2) + 10)
+                end)
+            else
+                Tween(Flyout, {Size = UDim2.new(0, 180, 0, 0)})
+                task.delay(0.25, function() if not isOpen then Flyout.Visible = false end end)
+                if updater then updater:Disconnect(); updater = nil end
+            end
         end
+        
         AnchorButton.MouseButton1Click:Connect(function() ToggleFlyout(not isOpen) end)
+        
+        UserInputService.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local mx, my = input.Position.X, input.Position.Y
+                local fx, fy = Flyout.AbsolutePosition.X, Flyout.AbsolutePosition.Y
+                local bx, by = AnchorButton.AbsolutePosition.X, AnchorButton.AbsolutePosition.Y
+                
+                local inFlyout = mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y
+                local inButton = mx >= bx and mx <= bx + AnchorButton.AbsoluteSize.X and my >= by and my <= by + AnchorButton.AbsoluteSize.Y
+                
+                if isOpen and not inFlyout and not inButton then ToggleFlyout(false) end
+            end
+        end)
         return Scroll
     end
 
-    -- Element Builder Factory
+    -- Element Builder Factory (Recursive for Sections and Options)
     local function BuildElements(TargetParent)
         local Elements = {}
         
-        -- [ NOVO: PARAGRAPH ]
-        function Elements:Paragraph(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
-            Create("UIPadding", {Parent = Frame, PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)})
-            local Title = Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Title or "Paragraph", TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local Content = Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 20), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Font = Keyser.Font, Text = Cfg.Content or "", TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true})
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Title})
-        end
-
         function Elements:Keybind(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(1, -70, 0.5, -11), Size = UDim2.new(0, 70, 0, 22), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = BindBtn, Color = "$Stroke", Thickness = 1})
-            local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = Cfg.Default and Cfg.Default.Name or "None", TextColor3 = "$Text", TextSize = 11})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-            local currentKey = Cfg.Default; local binding = false
+            local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -70, 0.5, -11), Size = UDim2.new(0, 70, 0, 22), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = BindBtn, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = Cfg.Default and Cfg.Default.Name or "None", TextColor3 = Keyser.Colors.Text, TextSize = 11})
+            
+            local currentKey = Cfg.Default
+            local binding = false
+            
             BindBtn.MouseButton1Click:Connect(function()
                 if binding then return end
                 binding = true; BindText.Text = "..."
-                local connection; connection = UserInputService.InputBegan:Connect(function(input)
+                local connection
+                connection = UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.Keyboard then
-                        if input.KeyCode == Enum.KeyCode.Escape then currentKey = nil; BindText.Text = "None"
-                        else currentKey = input.KeyCode; BindText.Text = input.KeyCode.Name end
-                        binding = false; if Cfg.Callback then pcall(Cfg.Callback, currentKey) end; connection:Disconnect()
-                    end
-                end)
-            end)
-        end
-
-        --[ NOVO: BIND PRO (Ctrl/Shift/Alt Support) ]
-        function Elements:Bind(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(1, -100, 0.5, -11), Size = UDim2.new(0, 100, 0, 22), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = BindBtn, Color = "$Stroke", Thickness = 1})
-            local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = Cfg.Default or "None", TextColor3 = "$Text", TextSize = 11})
-
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-            local currentBind = Cfg.Default; local binding = false
-            BindBtn.MouseButton1Click:Connect(function()
-                if binding then return end
-                binding = true; BindText.Text = "..."
-                local connection; connection = UserInputService.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.Keyboard then
-                        local key = input.KeyCode.Name
-                        if key == "Escape" then currentBind = nil; BindText.Text = "None"
-                        elseif key:match("Shift") or key:match("Control") or key:match("Alt") then return 
+                        if input.KeyCode == Enum.KeyCode.Escape then
+                            currentKey = nil; BindText.Text = "None"
                         else
-                            local mods = ""
-                            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then mods = mods .. "Ctrl+" end
-                            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift) then mods = mods .. "Shift+" end
-                            if UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt) or UserInputService:IsKeyDown(Enum.KeyCode.RightAlt) then mods = mods .. "Alt+" end
-                            currentBind = mods .. key; BindText.Text = currentBind
+                            currentKey = input.KeyCode; BindText.Text = input.KeyCode.Name
                         end
-                        binding = false; if Cfg.Callback then pcall(Cfg.Callback, currentBind) end; connection:Disconnect()
+                        binding = false; if Cfg.Callback then pcall(Cfg.Callback, currentKey) end
+                        connection:Disconnect()
                     end
                 end)
             end)
@@ -284,51 +266,97 @@ function Library:Window(Config)
         
         function Elements:Toggle(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 26)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local CheckBg = Create("TextButton", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(1, -22, 0.5, -11), Size = UDim2.new(0, 22, 0, 22), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = CheckBg, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = CheckBg, Color = "$Stroke", Thickness = 1})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            
+            local CheckBg = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(1, -22, 0.5, -11), Size = UDim2.new(0, 22, 0, 22), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = CheckBg, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = CheckBg, Color = Keyser.Colors.Stroke, Thickness = 1})
             local CheckIcon = Create("ImageLabel", {Parent = CheckBg, BackgroundTransparency = 1, Position = UDim2.new(0, 4, 0, 4), Size = UDim2.new(1, -8, 1, -8), Image = "rbxassetid://10709790644", ImageColor3 = Color3.new(0,0,0), ImageTransparency = 1})
             
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
-            local rightOffset = 30; local OptionBtn
+            local rightOffset = 30
+            local OptionBtn
             if Cfg.Option then
-                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -(rightOffset + 16), 0.5, -8), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = "$TextDark", ImageTransparency = 0.5})
+                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -(rightOffset + 16), 0.5, -8), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = Keyser.Colors.TextDark, ImageTransparency = 0.5})
                 OptionBtn.MouseEnter:Connect(function() Tween(OptionBtn, {ImageTransparency = 0}) end)
                 OptionBtn.MouseLeave:Connect(function() Tween(OptionBtn, {ImageTransparency = 0.5}) end)
+                rightOffset = rightOffset + 22
+            end
+
+            local boundKey = Cfg.Keybind
+            if boundKey ~= nil then
+                local BindBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Main, Position = UDim2.new(1, -(rightOffset + 40), 0.5, -10), Size = UDim2.new(0, 40, 0, 20), Text = "", AutoButtonColor = false})
+                Create("UICorner", {Parent = BindBtn, CornerRadius = UDim.new(0, 4)})
+                Create("UIStroke", {Parent = BindBtn, Color = Keyser.Colors.Stroke, Thickness = 1})
+                local BindText = Create("TextLabel", {Parent = BindBtn, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = typeof(boundKey)=="EnumItem" and boundKey.Name or "None", TextColor3 = Keyser.Colors.TextDark, TextSize = 10})
+                
+                local binding = false
+                BindBtn.MouseButton1Click:Connect(function()
+                    if binding then return end
+                    binding = true; BindText.Text = "..."
+                    local conn
+                    conn = UserInputService.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            if input.KeyCode == Enum.KeyCode.Escape then boundKey = nil; BindText.Text = "None"
+                            else boundKey = input.KeyCode; BindText.Text = boundKey.Name end
+                            binding = false; conn:Disconnect()
+                        end
+                    end)
+                end)
+                
+                UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == boundKey and boundKey ~= nil then
+                        CheckBg.BackgroundColor3 = Keyser.Colors.Hover
+                        task.delay(0.1, function()
+                            local t = not (CheckIcon.ImageTransparency == 0)
+                            if t then Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Accent}); Tween(CheckIcon, {ImageTransparency = 0}) else Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Element}); Tween(CheckIcon, {ImageTransparency = 1}) end
+                            if Cfg.Callback then pcall(Cfg.Callback, t) end
+                        end)
+                    end
+                end)
             end
 
             local Toggled = Cfg.Default or false
             local function Update()
-                if Toggled then Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Accent}); Tween(CheckIcon, {ImageTransparency = 0}) 
-                else Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Element}); Tween(CheckIcon, {ImageTransparency = 1}) end
+                if Toggled then 
+                    Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Accent})
+                    Tween(CheckIcon, {ImageTransparency = 0}) 
+                else 
+                    Tween(CheckBg, {BackgroundColor3 = Keyser.Colors.Element})
+                    Tween(CheckIcon, {ImageTransparency = 1}) 
+                end
                 if Cfg.Callback then pcall(Cfg.Callback, Toggled) end 
             end
             
             CheckBg.MouseButton1Click:Connect(function() Toggled = not Toggled; Update() end); Update()
-            local ReturnAPI = {}; if Cfg.Option then ReturnAPI.Option = BuildElements(CreateOptionFlyout(OptionBtn)) end
+            
+            local ReturnAPI = {}
+            if Cfg.Option then ReturnAPI.Option = BuildElements(CreateOptionFlyout(OptionBtn)) end
             return ReturnAPI
         end
 
         function Elements:Slider(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 45)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local ValBox = Create("Frame", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 40, 0, 20)})
-            local ValLabel = Create("TextLabel", {Parent = ValBox, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = "0.00", TextColor3 = "$TextDark", TextSize = 11})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
-            local Rail = Create("Frame", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(0, 0, 0, 30), Size = UDim2.new(1, 0, 0, 4)}); Create("UICorner", {Parent = Rail, CornerRadius = UDim.new(1, 0)})
-            local Fill = Create("Frame", {Parent = Rail, BackgroundColor3 = "$TextDark", Size = UDim2.new(0, 0, 1, 0)}); Create("UICorner", {Parent = Fill, CornerRadius = UDim.new(1, 0)})
+            local ValBox = Create("Frame", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 40, 0, 20)})
+            local ValLabel = Create("TextLabel", {Parent = ValBox, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Font = Keyser.FontBold, Text = "0.00", TextColor3 = Keyser.Colors.TextDark, TextSize = 11})
+            
+            local Rail = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.Element, Position = UDim2.new(0, 0, 0, 30), Size = UDim2.new(1, 0, 0, 4)}); Create("UICorner", {Parent = Rail, CornerRadius = UDim.new(1, 0)})
+            local Fill = Create("Frame", {Parent = Rail, BackgroundColor3 = Keyser.Colors.TextDark, Size = UDim2.new(0, 0, 1, 0)}); Create("UICorner", {Parent = Fill, CornerRadius = UDim.new(1, 0)})
+            local Knob = Create("Frame", {Parent = Fill, BackgroundColor3 = Keyser.Colors.TextDark, Size = UDim2.new(0, 10, 0, 10), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0)}); Create("UICorner", {Parent = Knob, CornerRadius = UDim.new(1, 0)})
+            
             local Trigger = Create("TextButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(0,0,0,20), Size = UDim2.new(1,0,0,25), Text = ""})
             
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
             local OptionBtn
-            if Cfg.Option then OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -65, 0, 2), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = "$TextDark", ImageTransparency = 0.5}) end
+            if Cfg.Option then
+                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -65, 0, 2), Size = UDim2.new(0, 16, 0, 16), Image = "rbxassetid://10734950309", ImageColor3 = Keyser.Colors.TextDark, ImageTransparency = 0.5})
+            end
 
             local Min, Max, Val = Cfg.Min or 0, Cfg.Max or 100, Cfg.Default or Min
             local function Set(v) 
                 Val = math.clamp(v, Min, Max); local P = (Val - Min) / (Max - Min); 
-                Tween(Fill, {Size = UDim2.new(P, 0, 1, 0)}); ValLabel.Text = string.format("%."..(Cfg.Decimals or 0).."f", Val); 
+                Tween(Fill, {Size = UDim2.new(P, 0, 1, 0)}); 
+                ValLabel.Text = string.format("%."..(Cfg.Decimals or 0).."f", Val); 
                 if Cfg.Callback then pcall(Cfg.Callback, Val) end 
             end
             
@@ -345,167 +373,20 @@ function Library:Window(Config)
                 end 
             end); Set(Val)
 
-            local ReturnAPI = {}; if Cfg.Option then ReturnAPI.Option = BuildElements(CreateOptionFlyout(OptionBtn)) end
+            local ReturnAPI = {}
+            if Cfg.Option then ReturnAPI.Option = BuildElements(CreateOptionFlyout(OptionBtn)) end
             return ReturnAPI
         end
-
-        -- [ NOVO: DROPDOWN MENU COM BUSCA ]
-        function Elements:Dropdown(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local DropBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = DropBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = DropBtn, Color = "$Stroke", Thickness = 1})
-            local DropText = Create("TextLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -30, 1, 0), Font = Keyser.Font, Text = "Select...", TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
-            local Icon = Create("ImageLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(1, -20, 0.5, -6), Size = UDim2.new(0, 12, 0, 12), Image = "rbxassetid://6031091004", ImageColor3 = "$TextDark"})
-
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
-            local Flyout = Create("Frame", {Parent = Screen, BackgroundColor3 = "$SectionBg", Size = UDim2.new(0, 200, 0, 0), Position = UDim2.new(0,0,0,0), ClipsDescendants = true, ZIndex = 120, Visible = false})
-            Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = "$Stroke", Thickness = 1})
-            local SearchBox = Create("TextBox", {Parent = Flyout, BackgroundColor3 = "$Element", Position = UDim2.new(0, 5, 0, 5), Size = UDim2.new(1, -10, 0, 25), Font = Keyser.Font, PlaceholderText = "Search...", Text = "", TextColor3 = "$Text", TextSize = 11})
-            Create("UICorner", {Parent = SearchBox, CornerRadius = UDim.new(0, 4)})
-            
-            local Scroll = Create("ScrollingFrame", {Parent = Flyout, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 35), Size = UDim2.new(1, 0, 1, -35), ScrollBarThickness = 2, ScrollBarImageColor3 = "$Stroke", CanvasSize = UDim2.new(0,0,0,0)})
-            local ListLayout = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)}); Create("UIPadding", {Parent = Scroll, PaddingTop = UDim.new(0, 5), PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5)})
-            ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10) end)
-
-            local isOpen = false; local updater; local selected = Cfg.MultiSelect and {} or nil; local itemBtns = {}
-
-            local function ToggleFlyout(state)
-                isOpen = state; Flyout.Visible = state
-                if state then
-                    Tween(Icon, {Rotation = 180}); Flyout.Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, math.clamp(ListLayout.AbsoluteContentSize.Y + 45, 0, 200))
-                    updater = RunService.RenderStepped:Connect(function() Flyout.Position = UDim2.new(0, DropBtn.AbsolutePosition.X, 0, DropBtn.AbsolutePosition.Y + DropBtn.AbsoluteSize.Y + 5) end)
-                else Tween(Icon, {Rotation = 0}); if updater then updater:Disconnect(); updater = nil end end
-            end
-            DropBtn.MouseButton1Click:Connect(function() ToggleFlyout(not isOpen) end)
-
-            for _, item in ipairs(Cfg.Items or {}) do
-                local btn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), Font = Keyser.Font, Text = "  "..item, TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
-                btn.MouseButton1Click:Connect(function()
-                    if Cfg.MultiSelect then
-                        selected[item] = not selected[item]; btn.TextColor3 = selected[item] and Keyser.Colors.Text or Keyser.Colors.TextDark
-                        local t = {}; for k, v in pairs(selected) do if v then table.insert(t, k) end end
-                        DropText.Text = #t > 0 and table.concat(t, ", ") or "Select..."
-                    else
-                        selected = item; for _, b in ipairs(itemBtns) do b.Btn.TextColor3 = Keyser.Colors.TextDark end
-                        btn.TextColor3 = Keyser.Colors.Text; DropText.Text = item; ToggleFlyout(false)
-                    end
-                    if Cfg.Callback then pcall(Cfg.Callback, selected) end
-                end)
-                table.insert(itemBtns, {Btn = btn, Val = item})
-            end
-
-            SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
-                local term = string.lower(SearchBox.Text); for _, b in ipairs(itemBtns) do b.Btn.Visible = string.find(string.lower(b.Val), term) ~= nil end
-            end)
-        end
-
-        --[ NOVO: PLAYER LIST (Busca Integrada de Jogadores com Avatares) ]
-        function Elements:PlayerList(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name or "Select Player", TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local DropBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = "$Element", Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = DropBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = DropBtn, Color = "$Stroke", Thickness = 1})
-            
-            local SelectedAvatar = Create("ImageLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 5, 0.5, -10), Size = UDim2.new(0, 20, 0, 20), Visible = false}); Create("UICorner", {Parent = SelectedAvatar, CornerRadius = UDim.new(1, 0)})
-            local DropText = Create("TextLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -50, 1, 0), Font = Keyser.Font, Text = "Select Player...", TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
-            local Icon = Create("ImageLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(1, -20, 0.5, -6), Size = UDim2.new(0, 12, 0, 12), Image = "rbxassetid://6031091004", ImageColor3 = "$TextDark"})
-
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
-            local Flyout = Create("Frame", {Parent = Screen, BackgroundColor3 = "$SectionBg", Size = UDim2.new(0, 200, 0, 0), Position = UDim2.new(0,0,0,0), ClipsDescendants = true, ZIndex = 120, Visible = false})
-            Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = "$Stroke", Thickness = 1})
-            local SearchBox = Create("TextBox", {Parent = Flyout, BackgroundColor3 = "$Element", Position = UDim2.new(0, 5, 0, 5), Size = UDim2.new(1, -10, 0, 25), Font = Keyser.Font, PlaceholderText = "Search Player...", Text = "", TextColor3 = "$Text", TextSize = 11})
-            Create("UICorner", {Parent = SearchBox, CornerRadius = UDim.new(0, 4)})
-            
-            local Scroll = Create("ScrollingFrame", {Parent = Flyout, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 35), Size = UDim2.new(1, 0, 1, -35), ScrollBarThickness = 2, ScrollBarImageColor3 = "$Stroke", CanvasSize = UDim2.new(0,0,0,0)})
-            local ListLayout = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)}); Create("UIPadding", {Parent = Scroll, PaddingTop = UDim.new(0, 5), PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5)})
-            ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10) end)
-
-            local isOpen = false; local updater; local itemBtns = {}
-
-            local function ToggleFlyout(state)
-                isOpen = state; Flyout.Visible = state
-                if state then
-                    Tween(Icon, {Rotation = 180}); Flyout.Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, math.clamp(ListLayout.AbsoluteContentSize.Y + 45, 0, 200))
-                    updater = RunService.RenderStepped:Connect(function() Flyout.Position = UDim2.new(0, DropBtn.AbsolutePosition.X, 0, DropBtn.AbsolutePosition.Y + DropBtn.AbsoluteSize.Y + 5) end)
-                else Tween(Icon, {Rotation = 0}); if updater then updater:Disconnect(); updater = nil end end
-            end
-            DropBtn.MouseButton1Click:Connect(function() ToggleFlyout(not isOpen) end)
-
-            local function Refresh()
-                for _, b in ipairs(itemBtns) do b.Btn:Destroy() end; itemBtns = {}
-                for _, p in ipairs(Players:GetPlayers()) do
-                    if p == Players.LocalPlayer then continue end
-                    local btn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 28), Text = ""})
-                    local av = Create("ImageLabel", {Parent = btn, BackgroundTransparency = 1, Position = UDim2.new(0, 5, 0.5, -10), Size = UDim2.new(0, 20, 0, 20), Image = "rbxthumb://type=AvatarHeadShot&id="..p.UserId.."&w=48&h=48"}); Create("UICorner", {Parent = av, CornerRadius = UDim.new(1, 0)})
-                    Create("TextLabel", {Parent = btn, BackgroundTransparency = 1, Position = UDim2.new(0, 30, 0, 0), Size = UDim2.new(1, -30, 1, 0), Font = Keyser.Font, Text = p.Name, TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
-                    
-                    btn.MouseButton1Click:Connect(function()
-                        DropText.Text = p.Name; SelectedAvatar.Image = av.Image; SelectedAvatar.Visible = true; DropText.Position = UDim2.new(0, 30, 0, 0); ToggleFlyout(false)
-                        if Cfg.Callback then pcall(Cfg.Callback, p.Name) end
-                    end)
-                    table.insert(itemBtns, {Btn = btn, Val = p.Name})
-                end
-            end
-            Refresh(); Players.PlayerAdded:Connect(Refresh); Players.PlayerRemoving:Connect(Refresh)
-
-            SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
-                local term = string.lower(SearchBox.Text); for _, b in ipairs(itemBtns) do b.Btn.Visible = string.find(string.lower(b.Val), term) ~= nil end
-            end)
-        end
-
-        -- [ NOVO: GRAPH (FPS / Ping) ]
-        function Elements:Graph(Cfg)
-            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 100)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name or "Performance", TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local GraphBg = Create("Frame", {Parent = Frame, BackgroundColor3 = "$ValueBox", Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 75), ClipsDescendants = true})
-            Create("UICorner", {Parent = GraphBg, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = GraphBg, Color = "$Stroke", Thickness = 1})
-            local ValueLabel = Create("TextLabel", {Parent = GraphBg, BackgroundTransparency = 1, Position = UDim2.new(1, -55, 0, 5), Size = UDim2.new(0, 50, 0, 15), Font = Keyser.FontBold, Text = "0", TextColor3 = "$Text", TextSize = 11, TextXAlignment = Enum.TextXAlignment.Right})
-
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
-            local lines = {}; local history = {}; local maxPoints = 40
-            local function UpdateGraph()
-                local minVal, maxVal = math.huge, -math.huge
-                for _, v in ipairs(history) do if v < minVal then minVal = v end if v > maxVal then maxVal = v end end
-                if maxVal - minVal < 10 then maxVal = minVal + 10 end
-                local range = maxVal - minVal; for _, line in ipairs(lines) do line:Destroy() end; lines = {}
-
-                local step = GraphBg.AbsoluteSize.X / (maxPoints - 1); local h = GraphBg.AbsoluteSize.Y
-                for i = 1, #history - 1 do
-                    local p1 = Vector2.new((i - 1) * step, h - ((history[i] - minVal) / range) * h)
-                    local p2 = Vector2.new(i * step, h - ((history[i + 1] - minVal) / range) * h)
-                    local dist = (p2 - p1).Magnitude; local center = (p1 + p2) / 2; local angle = math.atan2(p2.Y - p1.Y, p2.X - p1.X)
-
-                    local line = Create("Frame", {Parent = GraphBg, BackgroundColor3 = "$Accent", Size = UDim2.new(0, dist, 0, 2), Position = UDim2.new(0, center.X, 0, center.Y), AnchorPoint = Vector2.new(0.5, 0.5), Rotation = math.deg(angle), BorderSizePixel = 0})
-                    table.insert(lines, line)
-                end
-            end
-
-            local lastUpdate = 0
-            RunService.RenderStepped:Connect(function(dt)
-                if os.clock() - lastUpdate > 0.1 then
-                    lastUpdate = os.clock(); local val = 0
-                    if Cfg.Type == "FPS" then val = math.floor(1 / dt) elseif Cfg.Type == "Ping" then pcall(function() val = math.floor(game:GetService("Stats").Network.ServerStatsItem("Data Ping"):GetValue()) end) end
-                    table.insert(history, val); if #history > maxPoints then table.remove(history, 1) end
-                    ValueLabel.Text = tostring(val) .. (Cfg.Type == "FPS" and " FPS" or " ms"); if GraphBg.AbsoluteSize.X > 0 then UpdateGraph() end
-                end
-            end)
-        end
         
-        --[ ELEMENTOS CLÁSSICOS (ATUALIZADOS) ]
         function Elements:ColorPicker(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.8, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local ColorBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Cfg.Default or Color3.new(1,1,1), Position = UDim2.new(1, -30, 0.5, -10), Size = UDim2.new(0, 30, 0, 20), Text = "", AutoButtonColor = false})
-            Create("UICorner", {Parent = ColorBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = ColorBtn, Color = "$Stroke"})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(0.8, 0, 1, 0), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
             
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
-
-            local Flyout = Create("Frame", {Parent = Screen, BackgroundColor3 = "$SectionBg", Size = UDim2.new(0, 180, 0, 160), Position = UDim2.new(0,0,0,0), ClipsDescendants = true, ZIndex = 110, Visible = false})
-            Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = "$Stroke", Thickness = 1})
+            local ColorBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Cfg.Default or Color3.new(1,1,1), Position = UDim2.new(1, -30, 0.5, -10), Size = UDim2.new(0, 30, 0, 20), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = ColorBtn, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = ColorBtn, Color = Keyser.Colors.Stroke})
+            
+            local Flyout = Create("Frame", {Parent = Screen, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(0, 180, 0, 160), Position = UDim2.new(0,0,0,0), ClipsDescendants = true, ZIndex = 110, Visible = false})
+            Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = Keyser.Colors.Stroke, Thickness = 1})
 
             local SatValMap = Create("ImageButton", {Parent = Flyout, Position = UDim2.new(0, 10, 0, 10), Size = UDim2.new(0, 140, 0, 110), BackgroundColor3 = ColorBtn.BackgroundColor3, AutoButtonColor = false}); Create("UICorner", {Parent = SatValMap, CornerRadius = UDim.new(0, 4)})
             Create("UIGradient", {Parent = SatValMap, Color = ColorSequence.new(Color3.new(1,1,1), Color3.new(1,1,1)), Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0,0), NumberSequenceKeypoint.new(1,1)})})
@@ -517,8 +398,8 @@ function Library:Window(Config)
             Create("UIGradient", {Parent = HueRail, Rotation = 90, Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(0.166, Color3.fromRGB(255, 255, 0)), ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)), ColorSequenceKeypoint.new(0.666, Color3.fromRGB(0, 0, 255)), ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))})})
             local CursorH = Create("Frame", {Parent = HueRail, Size = UDim2.new(1, 0, 0, 2), Position = UDim2.new(0, 0, 0, 0), BackgroundColor3 = Color3.new(0,0,0)})
             
-            local HexBox = Create("TextBox", {Parent = Flyout, Position = UDim2.new(0, 10, 0, 130), Size = UDim2.new(0, 160, 0, 20), BackgroundColor3 = "$ValueBox", Font = Keyser.Font, Text = "#FFFFFF", TextColor3 = "$Text", TextSize = 12})
-            Create("UICorner", {Parent = HexBox, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = HexBox, Color = "$Stroke"})
+            local HexBox = Create("TextBox", {Parent = Flyout, Position = UDim2.new(0, 10, 0, 130), Size = UDim2.new(0, 160, 0, 20), BackgroundColor3 = Keyser.Colors.ValueBox, Font = Keyser.Font, Text = "#FFFFFF", TextColor3 = Keyser.Colors.Text, TextSize = 12})
+            Create("UICorner", {Parent = HexBox, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = HexBox, Color = Keyser.Colors.Stroke})
 
             local Hue, Sat, Val = ColorBtn.BackgroundColor3:ToHSV(); local updater, isOpen = nil, false
             local function UpdateColor()
@@ -526,10 +407,12 @@ function Library:Window(Config)
                 if Cfg.Callback then pcall(Cfg.Callback, newColor) end
             end
 
-            ColorBtn.MouseButton1Click:Connect(function() 
-                isOpen = not isOpen; Flyout.Visible = isOpen
-                if isOpen then updater = RunService.RenderStepped:Connect(function() Flyout.Position = UDim2.new(0, ColorBtn.AbsolutePosition.X - 150, 0, ColorBtn.AbsolutePosition.Y + 25) end) else if updater then updater:Disconnect(); updater = nil end end
-            end)
+            local function ToggleFlyout(state)
+                isOpen = state; Flyout.Visible = state
+                if state then updater = RunService.RenderStepped:Connect(function() Flyout.Position = UDim2.new(0, ColorBtn.AbsolutePosition.X - 150, 0, ColorBtn.AbsolutePosition.Y + 25) end)
+                else if updater then updater:Disconnect(); updater = nil end end
+            end
+            ColorBtn.MouseButton1Click:Connect(function() ToggleFlyout(not isOpen) end)
 
             local function HandleDrag(btn, type)
                 local dragging = false
@@ -546,28 +429,32 @@ function Library:Window(Config)
                     end
                 end)
             end
-            HandleDrag(HueRail, "Hue"); HandleDrag(SatValMap, "SV"); UpdateColor()
+            HandleDrag(HueRail, "Hue"); HandleDrag(SatValMap, "SV")
+            
+            UserInputService.InputBegan:Connect(function(input)
+                if isOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local mx, my, fx, fy, bx, by = input.Position.X, input.Position.Y, Flyout.AbsolutePosition.X, Flyout.AbsolutePosition.Y, ColorBtn.AbsolutePosition.X, ColorBtn.AbsolutePosition.Y
+                    if not (mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y) and not (mx >= bx and mx <= bx + ColorBtn.AbsoluteSize.X and my >= by and my <= by + ColorBtn.AbsoluteSize.Y) then ToggleFlyout(false) end
+                end
+            end); UpdateColor()
         end
 
         function Elements:Input(Cfg)
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55)})
-            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = "$Text", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
-            local InputContainer = Create("Frame", {Parent = Frame, BackgroundColor3 = "$ValueBox", Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30)}); Create("UICorner", {Parent = InputContainer, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = InputContainer, Color = "$Stroke", Thickness = 1})
-            local Box = Create("TextBox", {Parent = InputContainer, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -20, 1, 0), Font = Keyser.Font, Text = "", PlaceholderText = Cfg.Placeholder or "Search...", TextColor3 = "$Text", PlaceholderColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
-            AttachTooltip(Frame, Cfg.Description); table.insert(SearchableElements, {Obj = Frame, Name = Cfg.Name})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.Text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            local InputContainer = Create("Frame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30)}); Create("UICorner", {Parent = InputContainer, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = InputContainer, Color = Keyser.Colors.Stroke, Thickness = 1})
+            local Box = Create("TextBox", {Parent = InputContainer, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -20, 1, 0), Font = Keyser.Font, Text = "", PlaceholderText = Cfg.Placeholder or "Search...", TextColor3 = Keyser.Colors.Text, PlaceholderColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
             Box:GetPropertyChangedSignal("Text"):Connect(function() if Cfg.Callback then pcall(Cfg.Callback, Box.Text) end end)
         end
 
         function Elements:List(Cfg)
             local ListObj = {}
             local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, Cfg.Height or 150)})
-            local Scroll = Create("ScrollingFrame", {Parent = Frame, BackgroundColor3 = "$ValueBox", Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = "$Stroke", CanvasSize = UDim2.new(0,0,0,0)}); Create("UICorner", {Parent = Scroll, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = Scroll, Color = "$Stroke", Thickness = 1})
+            local Scroll = Create("ScrollingFrame", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0)}); Create("UICorner", {Parent = Scroll, CornerRadius = UDim.new(0, 4)}); Create("UIStroke", {Parent = Scroll, Color = Keyser.Colors.Stroke, Thickness = 1})
             local ListLayout = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder}); Create("UIPadding", {Parent = Scroll, PaddingLeft = UDim.new(0, 5)})
-            AttachTooltip(Frame, Cfg.Description)
-            
             local Items = {}; ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0,0,0, ListLayout.AbsoluteContentSize.Y) end)
             for _, v in pairs(Cfg.Items) do
-                local Btn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), Font = Keyser.Font, Text = "  "..v, TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
+                local Btn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), Font = Keyser.Font, Text = "  "..v, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
                 Btn.MouseButton1Click:Connect(function() for _, b in pairs(Items) do b.Obj.TextColor3 = Keyser.Colors.TextDark end; Btn.TextColor3 = Keyser.Colors.Text; if Cfg.Callback then pcall(Cfg.Callback, v) end end)
                 table.insert(Items, {Obj = Btn, Val = v})
             end
@@ -576,9 +463,8 @@ function Library:Window(Config)
         end
 
         function Elements:Button(Cfg)
-            local Btn = Create("TextButton", {Parent = TargetParent, BackgroundColor3 = "$Element", Size = UDim2.new(1, 0, 0, 32), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = "$TextDark", TextSize = 12, AutoButtonColor = false}); Create("UICorner", {Parent = Btn, CornerRadius = UDim.new(0, 4)})
-            Create("UIStroke", {Parent = Btn, Color = "$Stroke", Thickness = 1})
-            AttachTooltip(Btn, Cfg.Description); table.insert(SearchableElements, {Obj = Btn, Name = Cfg.Name})
+            local Btn = Create("TextButton", {Parent = TargetParent, BackgroundColor3 = Keyser.Colors.Element, Size = UDim2.new(1, 0, 0, 32), Font = Keyser.Font, Text = Cfg.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, AutoButtonColor = false}); Create("UICorner", {Parent = Btn, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = Btn, Color = Keyser.Colors.Stroke, Thickness = 1})
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundColor3 = Keyser.Colors.Hover, TextColor3 = Keyser.Colors.Text}) end); Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundColor3 = Keyser.Colors.Element, TextColor3 = Keyser.Colors.TextDark}) end)
             Btn.MouseButton1Click:Connect(function() if Cfg.Callback then pcall(Cfg.Callback) end end)
         end
@@ -586,16 +472,17 @@ function Library:Window(Config)
         return Elements
     end
 
+    --[ 1. TAB (SIDEBAR BUTTON) ]
     function WinData:Tab(Config)
         local TabObj = {}
         local TopButtonsFrame = Create("Frame", {Parent = NavContainer, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Visible = false})
         Create("UIListLayout", {Parent = TopButtonsFrame, FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 15)})
 
-        local SideBtn = Create("TextButton", {Parent = SideContainer, BackgroundColor3 = "$Element", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 38), Text = "", AutoButtonColor = false})
+        local SideBtn = Create("TextButton", {Parent = SideContainer, BackgroundColor3 = Keyser.Colors.Element, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 38), Text = "", AutoButtonColor = false})
         Create("UICorner", {Parent = SideBtn, CornerRadius = UDim.new(0, 4)})
 
-        local Icon = Create("ImageLabel", {Parent = SideBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0.5, -9), Size = UDim2.new(0, 18, 0, 18), Image = Config.Icon or "", ImageColor3 = "$TextDark"})
-        local Label = Create("TextLabel", {Parent = SideBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 40, 0, 0), Size = UDim2.new(1, -40, 1, 0), Font = Keyser.FontBold, Text = Config.Name, TextColor3 = "$TextDark", TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
+        local Icon = Create("ImageLabel", {Parent = SideBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0.5, -9), Size = UDim2.new(0, 18, 0, 18), Image = Config.Icon or "", ImageColor3 = Keyser.Colors.TextDark})
+        local Label = Create("TextLabel", {Parent = SideBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 40, 0, 0), Size = UDim2.new(1, -40, 1, 0), Font = Keyser.FontBold, Text = Config.Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
         
         TabObj.TopTabs = {}; TabObj.ActiveTop = nil
 
@@ -609,16 +496,20 @@ function Library:Window(Config)
                 if WinData.ActiveSidebar.ActiveTop then WinData.ActiveSidebar.ActiveTop.Page.Visible = false end
             end
             WinData.ActiveSidebar = TabObj
-            Tween(SideBtn, {BackgroundTransparency = 0}); Tween(Label, {TextColor3 = Keyser.Colors.Text}); Tween(Icon, {ImageColor3 = Keyser.Colors.Text})
-            TopButtonsFrame.Visible = true; if TabObj.ActiveTop then TabObj.ActiveTop:Activate() elseif #TabObj.TopTabs > 0 then TabObj.TopTabs[1]:Activate() end
+            Tween(SideBtn, {BackgroundTransparency = 0}) 
+            Tween(Label, {TextColor3 = Keyser.Colors.Text})
+            Tween(Icon, {ImageColor3 = Keyser.Colors.Text})
+            TopButtonsFrame.Visible = true
+            if TabObj.ActiveTop then TabObj.ActiveTop:Activate() elseif #TabObj.TopTabs > 0 then TabObj.TopTabs[1]:Activate() end
         end
 
         SideBtn.MouseButton1Click:Connect(ActivateSidebar)
         TabObj.Activate = ActivateSidebar; TabObj.Btn = SideBtn; TabObj.Label = Label; TabObj.Icon = Icon; TabObj.TopButtonsFrame = TopButtonsFrame
 
+        --[ 2. PAGE (TOPBAR BUTTON) ]
         function TabObj:Page(Name)
             local PageObj = {}
-            local TopBtn = Create("TextButton", {Parent = TopButtonsFrame, BackgroundColor3 = "$Element", BackgroundTransparency = 1, Size = UDim2.new(0, 0, 1, -20), Font = Keyser.FontBold, Text = Name, TextColor3 = "$TextDark", TextSize = 13, AutomaticSize = Enum.AutomaticSize.X})
+            local TopBtn = Create("TextButton", {Parent = TopButtonsFrame, BackgroundColor3 = Keyser.Colors.Element, BackgroundTransparency = 1, Size = UDim2.new(0, 0, 1, -20), Font = Keyser.FontBold, Text = Name, TextColor3 = Keyser.Colors.TextDark, TextSize = 13, AutomaticSize = Enum.AutomaticSize.X})
             Create("UICorner", {Parent = TopBtn, CornerRadius = UDim.new(0, 4)}); Create("UIPadding", {Parent = TopBtn, PaddingLeft = UDim.new(0, 16), PaddingRight = UDim.new(0, 16)})
 
             local PageFrame = Create("Frame", {Parent = PageContainer, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Visible = false})
@@ -630,42 +521,61 @@ function Library:Window(Config)
             Create("UIListLayout", {Parent = RightCol, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)})
 
             function PageObj:Activate()
-                if TabObj.ActiveTop and TabObj.ActiveTop ~= PageObj then Tween(TabObj.ActiveTop.Btn, {BackgroundTransparency = 1, TextColor3 = Keyser.Colors.TextDark}); TabObj.ActiveTop.Page.Visible = false end
-                TabObj.ActiveTop = PageObj; Tween(TopBtn, {BackgroundTransparency = 0, TextColor3 = Keyser.Colors.Text}); PageFrame.Visible = true
+                if TabObj.ActiveTop and TabObj.ActiveTop ~= PageObj then
+                    Tween(TabObj.ActiveTop.Btn, {BackgroundTransparency = 1, TextColor3 = Keyser.Colors.TextDark})
+                    TabObj.ActiveTop.Page.Visible = false
+                end
+                TabObj.ActiveTop = PageObj
+                Tween(TopBtn, {BackgroundTransparency = 0, TextColor3 = Keyser.Colors.Text})
+                PageFrame.Visible = true
             end
 
             TopBtn.MouseButton1Click:Connect(function() PageObj:Activate() end)
             PageObj.Btn = TopBtn; PageObj.Page = PageFrame
             table.insert(TabObj.TopTabs, PageObj)
 
+            --[ 3. SECTION (GROUPBOX) - FIVEM STYLE (Header differs from body) ]
             local SectionLib = {}
             function SectionLib:Section(SecConfig)
                 local Col = (SecConfig.Side == "Right" and RightCol) or LeftCol
-                local Groupbox = Create("Frame", {Parent = Col, BackgroundColor3 = "$SectionBg", Size = UDim2.new(1, 0, 0, SecConfig.Height or 0), AutomaticSize = SecConfig.Height and Enum.AutomaticSize.None or Enum.AutomaticSize.Y})
-                Create("UICorner", {Parent = Groupbox, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Groupbox, Color = "$Stroke", Thickness = 1})
+                local fixHeight = SecConfig.Height
+                
+                -- The Card Base (Floating inside Canvas)
+                local Groupbox = Create("Frame", {Parent = Col, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(1, 0, 0, fixHeight or 0), AutomaticSize = fixHeight and Enum.AutomaticSize.None or Enum.AutomaticSize.Y})
+                Create("UICorner", {Parent = Groupbox, CornerRadius = UDim.new(0, 6)})
+                Create("UIStroke", {Parent = Groupbox, Color = Keyser.Colors.Stroke, Thickness = 1})
 
-                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = "$SectionHeader", Size = UDim2.new(1, 0, 0, 38), BorderSizePixel = 0})
+                -- Header Frame (#1c1b22)
+                local HeaderFrame = Create("Frame", {Parent = Groupbox, BackgroundColor3 = Keyser.Colors.SectionHeader, Size = UDim2.new(1, 0, 0, 38), BorderSizePixel = 0})
                 Create("UICorner", {Parent = HeaderFrame, CornerRadius = UDim.new(0, 6)})
-                Create("Frame", {Parent = HeaderFrame, BackgroundColor3 = "$SectionHeader", Position = UDim2.new(0,0,1,-6), Size = UDim2.new(1,0,0,6), BorderSizePixel = 0}) 
-                Create("TextLabel", {Parent = HeaderFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(1, -15, 1, 0), Font = Keyser.FontBold, Text = SecConfig.Name, TextColor3 = "$Text", TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left})
-                
-                table.insert(SearchableElements, {Obj = Groupbox, Name = SecConfig.Name})
+                -- Fill bottom corners to merge with body
+                Create("Frame", {Parent = HeaderFrame, BackgroundColor3 = Keyser.Colors.SectionHeader, Position = UDim2.new(0,0,1,-6), Size = UDim2.new(1,0,0,6), BorderSizePixel = 0}) 
 
-                local ContentFrame
-                if SecConfig.Height then ContentFrame = Create("ScrollingFrame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 1, -38), ScrollBarThickness = 2, ScrollBarImageColor3 = "$Stroke", CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
-                else ContentFrame = Create("Frame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y}) end
+                Create("TextLabel", {Parent = HeaderFrame, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(1, -15, 1, 0), Font = Keyser.FontBold, Text = SecConfig.Name, TextColor3 = Keyser.Colors.Text, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left})
                 
+                -- Content Container (Starts exactly after the 38px header)
+                local ContentFrame
+                if fixHeight then
+                    ContentFrame = Create("ScrollingFrame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 1, -38), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
+                else
+                    ContentFrame = Create("Frame", {Parent = Groupbox, BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 38), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y})
+                end
+                
+                -- Tighter Paddings inside the Section
                 local CList = Create("UIListLayout", {Parent = ContentFrame, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5)})
                 Create("UIPadding", {Parent = ContentFrame, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12), PaddingBottom = UDim.new(0, 10)})
-                if SecConfig.Height then CList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() ContentFrame.CanvasSize = UDim2.new(0, 0, 0, CList.AbsoluteContentSize.Y + 20) end) end
+                
+                if fixHeight then CList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() ContentFrame.CanvasSize = UDim2.new(0, 0, 0, CList.AbsoluteContentSize.Y + 20) end) end
                 
                 return BuildElements(ContentFrame)
             end
             return SectionLib
         end
+        
         table.insert(AllSidebarTabs, TabObj)
         return TabObj
     end
+    
     task.defer(function() if not WinData.ActiveSidebar and #AllSidebarTabs > 0 then AllSidebarTabs[1]:Activate() end end)
     return WinData
 end
