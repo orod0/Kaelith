@@ -10,6 +10,7 @@
     - Independent Section Scrolling (Pass Height in Section Config).
     - Keybind System (Standalone & Embedded in Toggles).
     - Nested Options (Gear Icon / Flyout Menus) with smooth expanding.
+    - Advanced Single & Multi Dropdowns (Fatality Style).
     - Massive Lucide Icon Library (Integrated from Fatality).
     - Premium Animations (Quint Easing & Responsive Color Tweens).
 ]]
@@ -44,28 +45,20 @@ local Keyser = {
         ["lucide-accessibility"] = "rbxassetid://10709751939",
         ["lucide-activity"] = "rbxassetid://10709752035",
         ["lucide-air-vent"] = "rbxassetid://10709752131",
-        ["lucide-airplay"] = "rbxassetid://10709752254",
-        ["lucide-alarm-check"] = "rbxassetid://10709752405",["lucide-alarm-clock"] = "rbxassetid://10709752630",
+        ["lucide-airplay"] = "rbxassetid://10709752254",["lucide-alarm-check"] = "rbxassetid://10709752405",["lucide-alarm-clock"] = "rbxassetid://10709752630",
         ["lucide-alarm-clock-off"] = "rbxassetid://10709752508",
         ["lucide-alarm-minus"] = "rbxassetid://10709752732",
-        ["lucide-alarm-plus"] = "rbxassetid://10709752825",
-        ["lucide-album"] = "rbxassetid://10709752906",["lucide-alert-circle"] = "rbxassetid://10709752996",
+        ["lucide-alarm-plus"] = "rbxassetid://10709752825",["lucide-album"] = "rbxassetid://10709752906",["lucide-alert-circle"] = "rbxassetid://10709752996",
         ["lucide-alert-octagon"] = "rbxassetid://10709753064",
         ["lucide-alert-triangle"] = "rbxassetid://10709753149",
-        ["lucide-align-center"] = "rbxassetid://10709753570",["lucide-align-center-horizontal"] = "rbxassetid://10709753272",
-        ["lucide-align-center-vertical"] = "rbxassetid://10709753421",
+        ["lucide-align-center"] = "rbxassetid://10709753570",["lucide-align-center-horizontal"] = "rbxassetid://10709753272",["lucide-align-center-vertical"] = "rbxassetid://10709753421",
         ["lucide-align-end-horizontal"] = "rbxassetid://10709753692",
         ["lucide-align-end-vertical"] = "rbxassetid://10709753808",["lucide-align-horizontal-distribute-center"] = "rbxassetid://10747779791",
-        ["lucide-align-horizontal-distribute-end"] = "rbxassetid://10747784534",["lucide-align-horizontal-distribute-start"] = "rbxassetid://10709754118",
-        ["lucide-align-horizontal-justify-center"] = "rbxassetid://10709754204",
-        ["lucide-align-horizontal-justify-end"] = "rbxassetid://10709754317",["lucide-align-horizontal-justify-start"] = "rbxassetid://10709754436",
-        ["lucide-align-horizontal-space-around"] = "rbxassetid://10709754590",["lucide-align-horizontal-space-between"] = "rbxassetid://10709754749",
-        ["lucide-align-justify"] = "rbxassetid://10709759610",
-        ["lucide-align-left"] = "rbxassetid://10709759764",
-        ["lucide-align-right"] = "rbxassetid://10709759895",["lucide-align-start-horizontal"] = "rbxassetid://10709760051",["lucide-align-start-vertical"] = "rbxassetid://10709760244",
-        ["lucide-align-vertical-distribute-center"] = "rbxassetid://10709760351",["lucide-align-vertical-distribute-end"] = "rbxassetid://10709760434",
-        ["lucide-align-vertical-distribute-start"] = "rbxassetid://10709760612",
-        ["lucide-align-vertical-justify-center"] = "rbxassetid://10709760814",["lucide-align-vertical-justify-end"] = "rbxassetid://10709761003",
+        ["lucide-align-horizontal-distribute-end"] = "rbxassetid://10747784534",["lucide-align-horizontal-distribute-start"] = "rbxassetid://10709754118",["lucide-align-horizontal-justify-center"] = "rbxassetid://10709754204",
+        ["lucide-align-horizontal-justify-end"] = "rbxassetid://10709754317",["lucide-align-horizontal-justify-start"] = "rbxassetid://10709754436",["lucide-align-horizontal-space-around"] = "rbxassetid://10709754590",["lucide-align-horizontal-space-between"] = "rbxassetid://10709754749",
+        ["lucide-align-justify"] = "rbxassetid://10709759610",["lucide-align-left"] = "rbxassetid://10709759764",
+        ["lucide-align-right"] = "rbxassetid://10709759895",["lucide-align-start-horizontal"] = "rbxassetid://10709760051",["lucide-align-start-vertical"] = "rbxassetid://10709760244",["lucide-align-vertical-distribute-center"] = "rbxassetid://10709760351",["lucide-align-vertical-distribute-end"] = "rbxassetid://10709760434",
+        ["lucide-align-vertical-distribute-start"] = "rbxassetid://10709760612",["lucide-align-vertical-justify-center"] = "rbxassetid://10709760814",["lucide-align-vertical-justify-end"] = "rbxassetid://10709761003",
         ["lucide-align-vertical-justify-start"] = "rbxassetid://10709761176",["lucide-align-vertical-space-around"] = "rbxassetid://10709761324",["lucide-align-vertical-space-between"] = "rbxassetid://10709761434",
         ["lucide-anchor"] = "rbxassetid://10709761530",
         ["lucide-angry"] = "rbxassetid://10709761629",
@@ -75,211 +68,156 @@ local Keyser = {
         ["lucide-armchair"] = "rbxassetid://10709762327",
         ["lucide-arrow-big-down"] = "rbxassetid://10747796644",["lucide-arrow-big-left"] = "rbxassetid://10709762574",
         ["lucide-arrow-big-right"] = "rbxassetid://10709762727",
-        ["lucide-arrow-big-up"] = "rbxassetid://10709762879",["lucide-arrow-down"] = "rbxassetid://10709767827",["lucide-arrow-down-circle"] = "rbxassetid://10709763034",
-        ["lucide-arrow-down-left"] = "rbxassetid://10709767656",
-        ["lucide-arrow-down-right"] = "rbxassetid://10709767750",["lucide-arrow-left"] = "rbxassetid://10709768114",
-        ["lucide-arrow-left-circle"] = "rbxassetid://10709767936",
-        ["lucide-arrow-left-right"] = "rbxassetid://10709768019",
+        ["lucide-arrow-big-up"] = "rbxassetid://10709762879",["lucide-arrow-down"] = "rbxassetid://10709767827",["lucide-arrow-down-circle"] = "rbxassetid://10709763034",["lucide-arrow-down-left"] = "rbxassetid://10709767656",
+        ["lucide-arrow-down-right"] = "rbxassetid://10709767750",["lucide-arrow-left"] = "rbxassetid://10709768114",["lucide-arrow-left-circle"] = "rbxassetid://10709767936",["lucide-arrow-left-right"] = "rbxassetid://10709768019",
         ["lucide-arrow-right"] = "rbxassetid://10709768347",["lucide-arrow-right-circle"] = "rbxassetid://10709768226",
-        ["lucide-arrow-up"] = "rbxassetid://10709768939",
-        ["lucide-arrow-up-circle"] = "rbxassetid://10709768432",["lucide-arrow-up-down"] = "rbxassetid://10709768538",["lucide-arrow-up-left"] = "rbxassetid://10709768661",
-        ["lucide-arrow-up-right"] = "rbxassetid://10709768787",
-        ["lucide-asterisk"] = "rbxassetid://10709769095",
+        ["lucide-arrow-up"] = "rbxassetid://10709768939",["lucide-arrow-up-circle"] = "rbxassetid://10709768432",["lucide-arrow-up-down"] = "rbxassetid://10709768538",["lucide-arrow-up-left"] = "rbxassetid://10709768661",
+        ["lucide-arrow-up-right"] = "rbxassetid://10709768787",["lucide-asterisk"] = "rbxassetid://10709769095",
         ["lucide-at-sign"] = "rbxassetid://10709769286",["lucide-award"] = "rbxassetid://10709769406",
         ["lucide-axe"] = "rbxassetid://10709769508",
         ["lucide-axis-3d"] = "rbxassetid://10709769598",
-        ["lucide-baby"] = "rbxassetid://10709769732",
-        ["lucide-backpack"] = "rbxassetid://10709769841",
-        ["lucide-baggage-claim"] = "rbxassetid://10709769935",["lucide-banana"] = "rbxassetid://10709770005",
+        ["lucide-baby"] = "rbxassetid://10709769732",["lucide-backpack"] = "rbxassetid://10709769841",["lucide-baggage-claim"] = "rbxassetid://10709769935",["lucide-banana"] = "rbxassetid://10709770005",
         ["lucide-banknote"] = "rbxassetid://10709770178",
         ["lucide-bar-chart"] = "rbxassetid://10709773755",
         ["lucide-bar-chart-2"] = "rbxassetid://10709770317",["lucide-bar-chart-3"] = "rbxassetid://10709770431",["lucide-bar-chart-4"] = "rbxassetid://10709770560",
         ["lucide-bar-chart-horizontal"] = "rbxassetid://10709773669",
         ["lucide-barcode"] = "rbxassetid://10747360675",
-        ["lucide-baseline"] = "rbxassetid://10709773863",["lucide-bath"] = "rbxassetid://10709773963",["lucide-battery"] = "rbxassetid://10709774640",
-        ["lucide-battery-charging"] = "rbxassetid://10709774068",
+        ["lucide-baseline"] = "rbxassetid://10709773863",["lucide-bath"] = "rbxassetid://10709773963",["lucide-battery"] = "rbxassetid://10709774640",["lucide-battery-charging"] = "rbxassetid://10709774068",
         ["lucide-battery-full"] = "rbxassetid://10709774206",
         ["lucide-battery-low"] = "rbxassetid://10709774370",
-        ["lucide-battery-medium"] = "rbxassetid://10709774513",["lucide-beaker"] = "rbxassetid://10709774756",
-        ["lucide-bed"] = "rbxassetid://10709775036",
-        ["lucide-bed-double"] = "rbxassetid://10709774864",
+        ["lucide-battery-medium"] = "rbxassetid://10709774513",["lucide-beaker"] = "rbxassetid://10709774756",["lucide-bed"] = "rbxassetid://10709775036",["lucide-bed-double"] = "rbxassetid://10709774864",
         ["lucide-bed-single"] = "rbxassetid://10709774968",
         ["lucide-beer"] = "rbxassetid://10709775167",
-        ["lucide-bell"] = "rbxassetid://10709775704",["lucide-bell-minus"] = "rbxassetid://10709775241",
-        ["lucide-bell-off"] = "rbxassetid://10709775320",
-        ["lucide-bell-plus"] = "rbxassetid://10709775448",
+        ["lucide-bell"] = "rbxassetid://10709775704",["lucide-bell-minus"] = "rbxassetid://10709775241",["lucide-bell-off"] = "rbxassetid://10709775320",["lucide-bell-plus"] = "rbxassetid://10709775448",
         ["lucide-bell-ring"] = "rbxassetid://10709775560",
         ["lucide-bike"] = "rbxassetid://10709775894",["lucide-binary"] = "rbxassetid://10709776050",["lucide-bitcoin"] = "rbxassetid://10709776126",
-        ["lucide-bluetooth"] = "rbxassetid://10709776655",
-        ["lucide-bluetooth-connected"] = "rbxassetid://10709776240",
-        ["lucide-bluetooth-off"] = "rbxassetid://10709776344",
+        ["lucide-bluetooth"] = "rbxassetid://10709776655",["lucide-bluetooth-connected"] = "rbxassetid://10709776240",["lucide-bluetooth-off"] = "rbxassetid://10709776344",
         ["lucide-bluetooth-searching"] = "rbxassetid://10709776501",["lucide-bold"] = "rbxassetid://10747813908",["lucide-bomb"] = "rbxassetid://10709781460",
         ["lucide-bone"] = "rbxassetid://10709781605",
         ["lucide-book"] = "rbxassetid://10709781824",
         ["lucide-book-open"] = "rbxassetid://10709781717",
-        ["lucide-bookmark"] = "rbxassetid://10709782154",
-        ["lucide-bookmark-minus"] = "rbxassetid://10709781919",["lucide-bookmark-plus"] = "rbxassetid://10709782044",
+        ["lucide-bookmark"] = "rbxassetid://10709782154",["lucide-bookmark-minus"] = "rbxassetid://10709781919",["lucide-bookmark-plus"] = "rbxassetid://10709782044",
         ["lucide-bot"] = "rbxassetid://10709782230",
         ["lucide-box"] = "rbxassetid://10709782497",
         ["lucide-box-select"] = "rbxassetid://10709782342",
         ["lucide-boxes"] = "rbxassetid://10709782582",
-        ["lucide-briefcase"] = "rbxassetid://10709782662",["lucide-brush"] = "rbxassetid://10709782758",["lucide-bug"] = "rbxassetid://10709782845",
-        ["lucide-building"] = "rbxassetid://10709783051",
+        ["lucide-briefcase"] = "rbxassetid://10709782662",["lucide-brush"] = "rbxassetid://10709782758",["lucide-bug"] = "rbxassetid://10709782845",["lucide-building"] = "rbxassetid://10709783051",
         ["lucide-building-2"] = "rbxassetid://10709782939",
         ["lucide-bus"] = "rbxassetid://10709783137",
         ["lucide-cake"] = "rbxassetid://10709783217",
         ["lucide-calculator"] = "rbxassetid://10709783311",
-        ["lucide-calendar"] = "rbxassetid://10709789505",["lucide-calendar-check"] = "rbxassetid://10709783474",
-        ["lucide-calendar-check-2"] = "rbxassetid://10709783392",
+        ["lucide-calendar"] = "rbxassetid://10709789505",["lucide-calendar-check"] = "rbxassetid://10709783474",["lucide-calendar-check-2"] = "rbxassetid://10709783392",
         ["lucide-calendar-clock"] = "rbxassetid://10709783577",
         ["lucide-calendar-days"] = "rbxassetid://10709783673",["lucide-calendar-heart"] = "rbxassetid://10709783835",
-        ["lucide-calendar-minus"] = "rbxassetid://10709783959",
-        ["lucide-calendar-off"] = "rbxassetid://10709788784",
+        ["lucide-calendar-minus"] = "rbxassetid://10709783959",["lucide-calendar-off"] = "rbxassetid://10709788784",
         ["lucide-calendar-plus"] = "rbxassetid://10709788937",
         ["lucide-calendar-range"] = "rbxassetid://10709789053",["lucide-calendar-search"] = "rbxassetid://10709789200",
-        ["lucide-calendar-x"] = "rbxassetid://10709789407",
-        ["lucide-calendar-x-2"] = "rbxassetid://10709789329",
+        ["lucide-calendar-x"] = "rbxassetid://10709789407",["lucide-calendar-x-2"] = "rbxassetid://10709789329",
         ["lucide-camera"] = "rbxassetid://10709789686",
         ["lucide-camera-off"] = "rbxassetid://10747822677",["lucide-car"] = "rbxassetid://10709789810",
         ["lucide-carrot"] = "rbxassetid://10709789960",
         ["lucide-cast"] = "rbxassetid://10709790097",
-        ["lucide-charge"] = "rbxassetid://10709790202",
-        ["lucide-check"] = "rbxassetid://10709790644",
+        ["lucide-charge"] = "rbxassetid://10709790202",["lucide-check"] = "rbxassetid://10709790644",
         ["lucide-check-circle"] = "rbxassetid://10709790387",["lucide-check-circle-2"] = "rbxassetid://10709790298",
         ["lucide-check-square"] = "rbxassetid://10709790537",
-        ["lucide-chef-hat"] = "rbxassetid://10709790757",
-        ["lucide-cherry"] = "rbxassetid://10709790875",
-        ["lucide-chevron-down"] = "rbxassetid://10709790948",["lucide-chevron-first"] = "rbxassetid://10709791015",["lucide-chevron-last"] = "rbxassetid://10709791130",
+        ["lucide-chef-hat"] = "rbxassetid://10709790757",["lucide-cherry"] = "rbxassetid://10709790875",["lucide-chevron-down"] = "rbxassetid://10709790948",["lucide-chevron-first"] = "rbxassetid://10709791015",["lucide-chevron-last"] = "rbxassetid://10709791130",
         ["lucide-chevron-left"] = "rbxassetid://10709791281",
-        ["lucide-chevron-right"] = "rbxassetid://10709791437",
-        ["lucide-chevron-up"] = "rbxassetid://10709791523",["lucide-chevrons-down"] = "rbxassetid://10709796864",
-        ["lucide-chevrons-down-up"] = "rbxassetid://10709791632",
-        ["lucide-chevrons-left"] = "rbxassetid://10709797151",["lucide-chevrons-left-right"] = "rbxassetid://10709797006",
+        ["lucide-chevron-right"] = "rbxassetid://10709791437",["lucide-chevron-up"] = "rbxassetid://10709791523",["lucide-chevrons-down"] = "rbxassetid://10709796864",
+        ["lucide-chevrons-down-up"] = "rbxassetid://10709791632",["lucide-chevrons-left"] = "rbxassetid://10709797151",["lucide-chevrons-left-right"] = "rbxassetid://10709797006",
         ["lucide-chevrons-right"] = "rbxassetid://10709797382",
         ["lucide-chevrons-right-left"] = "rbxassetid://10709797274",["lucide-chevrons-up"] = "rbxassetid://10709797622",
         ["lucide-chevrons-up-down"] = "rbxassetid://10709797508",
         ["lucide-chrome"] = "rbxassetid://10709797725",
-        ["lucide-circle"] = "rbxassetid://10709798174",["lucide-circle-dot"] = "rbxassetid://10709797837",["lucide-circle-ellipsis"] = "rbxassetid://10709797985",
-        ["lucide-circle-slashed"] = "rbxassetid://10709798100",
+        ["lucide-circle"] = "rbxassetid://10709798174",["lucide-circle-dot"] = "rbxassetid://10709797837",["lucide-circle-ellipsis"] = "rbxassetid://10709797985",["lucide-circle-slashed"] = "rbxassetid://10709798100",
         ["lucide-citrus"] = "rbxassetid://10709798276",
         ["lucide-clapperboard"] = "rbxassetid://10709798350",
-        ["lucide-clipboard"] = "rbxassetid://10709799288",["lucide-clipboard-check"] = "rbxassetid://10709798443",
-        ["lucide-clipboard-copy"] = "rbxassetid://10709798574",
+        ["lucide-clipboard"] = "rbxassetid://10709799288",["lucide-clipboard-check"] = "rbxassetid://10709798443",["lucide-clipboard-copy"] = "rbxassetid://10709798574",
         ["lucide-clipboard-edit"] = "rbxassetid://10709798682",
-        ["lucide-clipboard-list"] = "rbxassetid://10709798792",["lucide-clipboard-signature"] = "rbxassetid://10709798890",["lucide-clipboard-type"] = "rbxassetid://10709798999",
-        ["lucide-clipboard-x"] = "rbxassetid://10709799124",
-        ["lucide-clock"] = "rbxassetid://10709805144",
+        ["lucide-clipboard-list"] = "rbxassetid://10709798792",["lucide-clipboard-signature"] = "rbxassetid://10709798890",["lucide-clipboard-type"] = "rbxassetid://10709798999",["lucide-clipboard-x"] = "rbxassetid://10709799124",["lucide-clock"] = "rbxassetid://10709805144",
         ["lucide-cloud"] = "rbxassetid://10709806740",
         ["lucide-code"] = "rbxassetid://10709810463",["lucide-code-2"] = "rbxassetid://10709807111",["lucide-coffee"] = "rbxassetid://10709810814",
         ["lucide-cog"] = "rbxassetid://10709810948",
         ["lucide-coins"] = "rbxassetid://10709811110",
-        ["lucide-command"] = "rbxassetid://10709811365",
-        ["lucide-compass"] = "rbxassetid://10709811445",
-        ["lucide-component"] = "rbxassetid://10709811595",
+        ["lucide-command"] = "rbxassetid://10709811365",["lucide-compass"] = "rbxassetid://10709811445",["lucide-component"] = "rbxassetid://10709811595",
         ["lucide-copy"] = "rbxassetid://10709812159",
         ["lucide-cpu"] = "rbxassetid://10709813383",["lucide-crosshair"] = "rbxassetid://10709818534",
         ["lucide-crown"] = "rbxassetid://10709818626",
         ["lucide-database"] = "rbxassetid://10709818996",
-        ["lucide-delete"] = "rbxassetid://10709819059",
-        ["lucide-diamond"] = "rbxassetid://10709819149",
-        ["lucide-disc"] = "rbxassetid://10723343537",
+        ["lucide-delete"] = "rbxassetid://10709819059",["lucide-diamond"] = "rbxassetid://10709819149",["lucide-disc"] = "rbxassetid://10723343537",
         ["lucide-download"] = "rbxassetid://10723344270",
         ["lucide-droplet"] = "rbxassetid://10723344432",["lucide-edit"] = "rbxassetid://10734883598",
         ["lucide-eye"] = "rbxassetid://10723346959",
         ["lucide-eye-off"] = "rbxassetid://10723346871",
-        ["lucide-file"] = "rbxassetid://10723374641",
-        ["lucide-filter"] = "rbxassetid://10723375128",
-        ["lucide-flag"] = "rbxassetid://10723375890",
+        ["lucide-file"] = "rbxassetid://10723374641",["lucide-filter"] = "rbxassetid://10723375128",["lucide-flag"] = "rbxassetid://10723375890",
         ["lucide-flame"] = "rbxassetid://10723376114",
         ["lucide-folder"] = "rbxassetid://10723387563",["lucide-gamepad"] = "rbxassetid://10723395457",
         ["lucide-gamepad-2"] = "rbxassetid://10723395215",
-        ["lucide-globe"] = "rbxassetid://10723404337",
-        ["lucide-hash"] = "rbxassetid://10723405975",
-        ["lucide-headphones"] = "rbxassetid://10723406165",
+        ["lucide-globe"] = "rbxassetid://10723404337",["lucide-hash"] = "rbxassetid://10723405975",["lucide-headphones"] = "rbxassetid://10723406165",
         ["lucide-heart"] = "rbxassetid://10723406885",
         ["lucide-help-circle"] = "rbxassetid://10723406988",["lucide-home"] = "rbxassetid://10723407389",["lucide-image"] = "rbxassetid://10723415040",
         ["lucide-info"] = "rbxassetid://10723415903",
         ["lucide-key"] = "rbxassetid://10723416652",
-        ["lucide-keyboard"] = "rbxassetid://10723416765",
-        ["lucide-layers"] = "rbxassetid://10723424505",
+        ["lucide-keyboard"] = "rbxassetid://10723416765",["lucide-layers"] = "rbxassetid://10723424505",
         ["lucide-layout"] = "rbxassetid://10723425376",
         ["lucide-link"] = "rbxassetid://10723426722",["lucide-list"] = "rbxassetid://10723433811",["lucide-lock"] = "rbxassetid://10723434711",
         ["lucide-log-in"] = "rbxassetid://10723434830",
         ["lucide-log-out"] = "rbxassetid://10723434906",
-        ["lucide-mail"] = "rbxassetid://10734885430",
-        ["lucide-map"] = "rbxassetid://10734886202",
+        ["lucide-mail"] = "rbxassetid://10734885430",["lucide-map"] = "rbxassetid://10734886202",
         ["lucide-maximize"] = "rbxassetid://10734886735",["lucide-menu"] = "rbxassetid://10734887784",
         ["lucide-message-circle"] = "rbxassetid://10734888000",
         ["lucide-message-square"] = "rbxassetid://10734888228",
         ["lucide-mic"] = "rbxassetid://10734888864",
-        ["lucide-minimize"] = "rbxassetid://10734895698",
-        ["lucide-minus"] = "rbxassetid://10734896206",
-        ["lucide-monitor"] = "rbxassetid://10734896881",["lucide-moon"] = "rbxassetid://10734897102",
+        ["lucide-minimize"] = "rbxassetid://10734895698",["lucide-minus"] = "rbxassetid://10734896206",["lucide-monitor"] = "rbxassetid://10734896881",["lucide-moon"] = "rbxassetid://10734897102",
         ["lucide-more-horizontal"] = "rbxassetid://10734897250",
         ["lucide-more-vertical"] = "rbxassetid://10734897387",
         ["lucide-mouse"] = "rbxassetid://10734898592",
-        ["lucide-move"] = "rbxassetid://10734900011",
-        ["lucide-music"] = "rbxassetid://10734905958",
-        ["lucide-navigation"] = "rbxassetid://10734906744",
+        ["lucide-move"] = "rbxassetid://10734900011",["lucide-music"] = "rbxassetid://10734905958",["lucide-navigation"] = "rbxassetid://10734906744",
         ["lucide-package"] = "rbxassetid://10734909540",["lucide-pause"] = "rbxassetid://10734919336",
         ["lucide-pen-tool"] = "rbxassetid://10734919503",
         ["lucide-pencil"] = "rbxassetid://10734919691",
         ["lucide-percent"] = "rbxassetid://10734919919",
-        ["lucide-phone"] = "rbxassetid://10734921524",
-        ["lucide-pie-chart"] = "rbxassetid://10734921727",
+        ["lucide-phone"] = "rbxassetid://10734921524",["lucide-pie-chart"] = "rbxassetid://10734921727",
         ["lucide-pin"] = "rbxassetid://10734922324",["lucide-play"] = "rbxassetid://10734923549",["lucide-plus"] = "rbxassetid://10734924532",
         ["lucide-pointer"] = "rbxassetid://10734929723",
         ["lucide-power"] = "rbxassetid://10734930466",
         ["lucide-printer"] = "rbxassetid://10734930632",
-        ["lucide-radio"] = "rbxassetid://10734931596",
-        ["lucide-refresh-ccw"] = "rbxassetid://10734933056",
-        ["lucide-refresh-cw"] = "rbxassetid://10734933222",["lucide-repeat"] = "rbxassetid://10734933966",
-        ["lucide-save"] = "rbxassetid://10734941499",
+        ["lucide-radio"] = "rbxassetid://10734931596",["lucide-refresh-ccw"] = "rbxassetid://10734933056",["lucide-refresh-cw"] = "rbxassetid://10734933222",["lucide-repeat"] = "rbxassetid://10734933966",["lucide-save"] = "rbxassetid://10734941499",
         ["lucide-scissors"] = "rbxassetid://10734942778",
         ["lucide-search"] = "rbxassetid://10734943674",
         ["lucide-send"] = "rbxassetid://10734943902",
         ["lucide-server"] = "rbxassetid://10734949856",
         ["lucide-settings"] = "rbxassetid://10734950309",
-        ["lucide-share"] = "rbxassetid://10734950813",["lucide-shield"] = "rbxassetid://10734951847",
-        ["lucide-shopping-cart"] = "rbxassetid://10734952479",
+        ["lucide-share"] = "rbxassetid://10734950813",["lucide-shield"] = "rbxassetid://10734951847",["lucide-shopping-cart"] = "rbxassetid://10734952479",
         ["lucide-shuffle"] = "rbxassetid://10734953451",
         ["lucide-sidebar"] = "rbxassetid://10734954301",
         ["lucide-sliders"] = "rbxassetid://10734963400",
         ["lucide-smartphone"] = "rbxassetid://10734963940",
         ["lucide-smile"] = "rbxassetid://10734964441",
-        ["lucide-speaker"] = "rbxassetid://10734965419",
-        ["lucide-square"] = "rbxassetid://10734965702",["lucide-star"] = "rbxassetid://10734966248",
-        ["lucide-sun"] = "rbxassetid://10734974297",
+        ["lucide-speaker"] = "rbxassetid://10734965419",["lucide-square"] = "rbxassetid://10734965702",["lucide-star"] = "rbxassetid://10734966248",["lucide-sun"] = "rbxassetid://10734974297",
         ["lucide-sword"] = "rbxassetid://10734975486",
         ["lucide-swords"] = "rbxassetid://10734975692",
         ["lucide-table"] = "rbxassetid://10734976230",
         ["lucide-tablet"] = "rbxassetid://10734976394",
         ["lucide-tag"] = "rbxassetid://10734976528",
-        ["lucide-tags"] = "rbxassetid://10734976739",["lucide-target"] = "rbxassetid://10734977012",["lucide-terminal"] = "rbxassetid://10734982144",
-        ["lucide-thumbs-down"] = "rbxassetid://10734983359",
+        ["lucide-tags"] = "rbxassetid://10734976739",["lucide-target"] = "rbxassetid://10734977012",["lucide-terminal"] = "rbxassetid://10734982144",["lucide-thumbs-down"] = "rbxassetid://10734983359",
         ["lucide-thumbs-up"] = "rbxassetid://10734983629",
         ["lucide-toggle-left"] = "rbxassetid://10734984834",
-        ["lucide-toggle-right"] = "rbxassetid://10734985040",["lucide-trash"] = "rbxassetid://10747362393",["lucide-trash-2"] = "rbxassetid://10747362241",
-        ["lucide-trending-down"] = "rbxassetid://10747363205",
+        ["lucide-toggle-right"] = "rbxassetid://10734985040",["lucide-trash"] = "rbxassetid://10747362393",["lucide-trash-2"] = "rbxassetid://10747362241",["lucide-trending-down"] = "rbxassetid://10747363205",
         ["lucide-trending-up"] = "rbxassetid://10747363465",
         ["lucide-triangle"] = "rbxassetid://10747363621",
         ["lucide-trophy"] = "rbxassetid://10747363809",
-        ["lucide-truck"] = "rbxassetid://10747364031",
-        ["lucide-tv"] = "rbxassetid://10747364593",["lucide-type"] = "rbxassetid://10747364761",["lucide-umbrella"] = "rbxassetid://10747364971",
+        ["lucide-truck"] = "rbxassetid://10747364031",["lucide-tv"] = "rbxassetid://10747364593",["lucide-type"] = "rbxassetid://10747364761",["lucide-umbrella"] = "rbxassetid://10747364971",
         ["lucide-underline"] = "rbxassetid://10747365191",
         ["lucide-undo"] = "rbxassetid://10747365484",
         ["lucide-unlock"] = "rbxassetid://10747366027",
         ["lucide-upload"] = "rbxassetid://10747366434",
         ["lucide-user"] = "rbxassetid://10747373176",
-        ["lucide-users"] = "rbxassetid://10747373426",["lucide-video"] = "rbxassetid://10747374938",["lucide-volume"] = "rbxassetid://10747376008",
-        ["lucide-volume-x"] = "rbxassetid://10747375880",
+        ["lucide-users"] = "rbxassetid://10747373426",["lucide-video"] = "rbxassetid://10747374938",["lucide-volume"] = "rbxassetid://10747376008",["lucide-volume-x"] = "rbxassetid://10747375880",
         ["lucide-wallet"] = "rbxassetid://10747376205",
         ["lucide-wand"] = "rbxassetid://10747376565",
         ["lucide-watch"] = "rbxassetid://10747376722",
         ["lucide-wifi"] = "rbxassetid://10747382504",["lucide-wind"] = "rbxassetid://10747382750",["lucide-wrench"] = "rbxassetid://10747383470",
-        ["lucide-x"] = "rbxassetid://10747384394",
-        ["lucide-zoom-in"] = "rbxassetid://10747384552",
-        ["lucide-zoom-out"] = "rbxassetid://10747384679",
+        ["lucide-x"] = "rbxassetid://10747384394",["lucide-zoom-in"] = "rbxassetid://10747384552",["lucide-zoom-out"] = "rbxassetid://10747384679",
     }
 }
 
@@ -392,7 +330,7 @@ function Library:Window(Config)
             if MainFrame.GroupTransparency == 0 then
                 Tween(MainFrame, {GroupTransparency = 1}, 0.3)
                 for _, f in pairs(Screen:GetChildren()) do
-                    if f.Name == "Flyout" and f.Visible then
+                    if f:IsA("CanvasGroup") and f.Name ~= "Main" and f.Visible then
                         Tween(f, {GroupTransparency = 1}, 0.3)
                         task.delay(0.3, function() f.Visible = false end)
                     end
@@ -686,7 +624,7 @@ function Library:Window(Config)
             ColorBtn.MouseEnter:Connect(function() Tween(ColorStroke, {Color = Keyser.Colors.TextDark}) end)
             ColorBtn.MouseLeave:Connect(function() Tween(ColorStroke, {Color = Keyser.Colors.Stroke}) end)
 
-            local Flyout = Create("CanvasGroup", {Name = "Flyout", Parent = Screen, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(0, 180, 0, 0), Position = UDim2.new(0,0,0,0), ZIndex = 110, Visible = false, GroupTransparency = 1})
+            local Flyout = Create("CanvasGroup", {Name = "ColorFlyout", Parent = Screen, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(0, 180, 0, 0), Position = UDim2.new(0,0,0,0), ZIndex = 110, Visible = false, GroupTransparency = 1})
             Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 6)}); Create("UIStroke", {Parent = Flyout, Color = Keyser.Colors.Stroke, Thickness = 1})
 
             local SatValMap = Create("ImageButton", {Parent = Flyout, Position = UDim2.new(0, 10, 0, 10), Size = UDim2.new(0, 140, 0, 110), BackgroundColor3 = ColorBtn.BackgroundColor3, AutoButtonColor = false}); Create("UICorner", {Parent = SatValMap, CornerRadius = UDim.new(0, 4)})
@@ -748,6 +686,151 @@ function Library:Window(Config)
                     if not (mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y) and not (mx >= bx and mx <= bx + ColorBtn.AbsoluteSize.X and my >= by and my <= by + ColorBtn.AbsoluteSize.Y) then ToggleFlyout(false) end
                 end
             end); UpdateColor()
+        end
+
+        function Elements:Dropdown(Cfg)
+            local Multi = Cfg.Multi or false
+            local Selected = Cfg.Default or (Multi and {} or nil)
+            
+            local function GetSelectedText()
+                if Multi then
+                    local selectedList = {}
+                    for k, v in pairs(Selected) do
+                        if v then table.insert(selectedList, type(k) == "number" and v or k) end
+                    end
+                    if #selectedList == 0 then return "None" end
+                    return table.concat(selectedList, ", ")
+                else
+                    return Selected and tostring(Selected) or "None"
+                end
+            end
+
+            local Frame = Create("Frame", {Parent = TargetParent, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55)})
+            Create("TextLabel", {Parent = Frame, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), Font = Keyser.FontBold, Text = Cfg.Name, TextColor3 = Keyser.Colors.Text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left})
+            
+            local DropBtn = Create("TextButton", {Parent = Frame, BackgroundColor3 = Keyser.Colors.ValueBox, Position = UDim2.new(0, 0, 0, 25), Size = UDim2.new(1, 0, 0, 30), Text = "", AutoButtonColor = false})
+            Create("UICorner", {Parent = DropBtn, CornerRadius = UDim.new(0, 4)})
+            local DropStroke = Create("UIStroke", {Parent = DropBtn, Color = Keyser.Colors.Stroke, Thickness = 1})
+            
+            local SelectedText = Create("TextLabel", {Parent = DropBtn, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -30, 1, 0), Font = Keyser.Font, Text = GetSelectedText(), TextColor3 = Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd})
+            local ArrowIcon = Create("ImageLabel", {Parent = DropBtn, BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.new(0, 16, 0, 16), Image = GetIcon("chevron-down"), ImageColor3 = Keyser.Colors.TextDark})
+
+            DropBtn.MouseEnter:Connect(function() Tween(DropStroke, {Color = Keyser.Colors.TextDark}) end)
+            DropBtn.MouseLeave:Connect(function() Tween(DropStroke, {Color = Keyser.Colors.Stroke}) end)
+
+            local OptionBtn
+            if Cfg.Option then
+                OptionBtn = Create("ImageButton", {Parent = Frame, BackgroundTransparency = 1, Position = UDim2.new(1, -16, 0, 2), Size = UDim2.new(0, 16, 0, 16), Image = GetIcon("settings"), ImageColor3 = Keyser.Colors.TextDark, ImageTransparency = 0.5})
+                OptionBtn.MouseEnter:Connect(function() Tween(OptionBtn, {ImageTransparency = 0}) end)
+                OptionBtn.MouseLeave:Connect(function() Tween(OptionBtn, {ImageTransparency = 0.5}) end)
+            end
+
+            local Flyout = Create("CanvasGroup", {Name = "DropdownFlyout", Parent = Screen, BackgroundColor3 = Keyser.Colors.SectionBg, Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0,0,0,0), ZIndex = 110, Visible = false, GroupTransparency = 1})
+            Create("UICorner", {Parent = Flyout, CornerRadius = UDim.new(0, 4)})
+            Create("UIStroke", {Parent = Flyout, Color = Keyser.Colors.Stroke, Thickness = 1})
+
+            local Scroll = Create("ScrollingFrame", {Parent = Flyout, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), ScrollBarThickness = 2, ScrollBarImageColor3 = Keyser.Colors.Stroke, CanvasSize = UDim2.new(0,0,0,0)})
+            local List = Create("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
+            Create("UIPadding", {Parent = Scroll, PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5), PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5)})
+            
+            List:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Scroll.CanvasSize = UDim2.new(0, 0, 0, List.AbsoluteContentSize.Y + 10) end)
+
+            local isOpen = false
+            local updater = nil
+            local OptionItems = {}
+
+            local function BuildOptions(optionsData)
+                for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                OptionItems = {}
+                for i, opt in pairs(optionsData) do
+                    local optStr = tostring(opt)
+                    local isSelected = false
+                    if Multi then isSelected = Selected[optStr] == true else isSelected = (Selected == optStr) end
+
+                    local OptBtn = Create("TextButton", {Parent = Scroll, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), Font = Keyser.Font, Text = "  " .. optStr, TextColor3 = isSelected and Keyser.Colors.Accent or Keyser.Colors.TextDark, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left})
+                    local OptBg = Create("Frame", {Parent = OptBtn, Size = UDim2.new(1,0,1,0), BackgroundColor3 = Keyser.Colors.Hover, BackgroundTransparency = 1, ZIndex = OptBtn.ZIndex - 1})
+                    Create("UICorner", {Parent = OptBg, CornerRadius = UDim.new(0, 4)})
+
+                    OptBtn.MouseEnter:Connect(function() Tween(OptBg, {BackgroundTransparency = 0}) end)
+                    OptBtn.MouseLeave:Connect(function() Tween(OptBg, {BackgroundTransparency = 1}) end)
+
+                    OptBtn.MouseButton1Click:Connect(function()
+                        if Multi then
+                            Selected[optStr] = not Selected[optStr]
+                            Tween(OptBtn, {TextColor3 = Selected[optStr] and Keyser.Colors.Accent or Keyser.Colors.TextDark})
+                        else
+                            Selected = optStr
+                            for _, item in pairs(OptionItems) do Tween(item.Btn, {TextColor3 = Keyser.Colors.TextDark}) end
+                            Tween(OptBtn, {TextColor3 = Keyser.Colors.Accent})
+                            local function CloseFlyout()
+                                isOpen = false
+                                Tween(ArrowIcon, {Rotation = 0, ImageColor3 = Keyser.Colors.TextDark})
+                                Tween(DropStroke, {Color = Keyser.Colors.Stroke})
+                                Tween(Flyout, {GroupTransparency = 1, Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, 0)}, 0.3)
+                                task.delay(0.3, function() if not isOpen then Flyout.Visible = false end end)
+                                if updater then updater:Disconnect(); updater = nil end
+                            end
+                            CloseFlyout()
+                        end
+                        SelectedText.Text = GetSelectedText()
+                        Tween(SelectedText, {TextColor3 = Keyser.Colors.Text})
+                        if Cfg.Callback then task.spawn(Cfg.Callback, Selected) end
+                    end)
+
+                    table.insert(OptionItems, {Btn = OptBtn, Value = optStr})
+                end
+            end
+
+            local function ToggleFlyout(state)
+                isOpen = state
+                if isOpen then
+                    Flyout.Visible = true
+                    Tween(ArrowIcon, {Rotation = 180, ImageColor3 = Keyser.Colors.Accent})
+                    Tween(DropStroke, {Color = Keyser.Colors.Accent})
+                    Tween(Flyout, {GroupTransparency = 0}, 0.2)
+                    local targetHeight = math.clamp(List.AbsoluteContentSize.Y + 10, 0, 200)
+                    Flyout.Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, 0)
+                    Tween(Flyout, {Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, targetHeight)}, 0.3)
+                    
+                    updater = RunService.RenderStepped:Connect(function(dt)
+                        local targetPos = UDim2.new(0, DropBtn.AbsolutePosition.X, 0, DropBtn.AbsolutePosition.Y + DropBtn.AbsoluteSize.Y + 5)
+                        Flyout.Position = Flyout.Position:Lerp(targetPos, math.clamp(dt * 15, 0, 1))
+                    end)
+                else
+                    Tween(ArrowIcon, {Rotation = 0, ImageColor3 = Keyser.Colors.TextDark})
+                    Tween(DropStroke, {Color = Keyser.Colors.Stroke})
+                    Tween(Flyout, {GroupTransparency = 1, Size = UDim2.new(0, DropBtn.AbsoluteSize.X, 0, 0)}, 0.3)
+                    task.delay(0.3, function() if not isOpen then Flyout.Visible = false end end)
+                    if updater then updater:Disconnect(); updater = nil end
+                end
+            end
+
+            DropBtn.MouseButton1Click:Connect(function() ToggleFlyout(not isOpen) end)
+
+            UserInputService.InputBegan:Connect(function(input)
+                if isOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    local mx, my = input.Position.X, input.Position.Y
+                    local fx, fy = Flyout.AbsolutePosition.X, Flyout.AbsolutePosition.Y
+                    local bx, by = DropBtn.AbsolutePosition.X, DropBtn.AbsolutePosition.Y
+                    
+                    local inFlyout = mx >= fx and mx <= fx + Flyout.AbsoluteSize.X and my >= fy and my <= fy + Flyout.AbsoluteSize.Y
+                    local inButton = mx >= bx and mx <= bx + DropBtn.AbsoluteSize.X and my >= by and my <= by + DropBtn.AbsoluteSize.Y
+                    
+                    if not inFlyout and not inButton then ToggleFlyout(false) end
+                end
+            end)
+
+            BuildOptions(Cfg.Options or {})
+
+            if Selected then 
+                SelectedText.Text = GetSelectedText()
+                SelectedText.TextColor3 = Keyser.Colors.Text 
+            end
+
+            local ReturnAPI = {}
+            function ReturnAPI:Refresh(newOptions) BuildOptions(newOptions) end
+            if Cfg.Option then ReturnAPI.Option = BuildElements(CreateOptionFlyout(OptionBtn)) end
+            return ReturnAPI
         end
 
         function Elements:Input(Cfg)
